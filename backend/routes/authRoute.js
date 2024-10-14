@@ -48,33 +48,37 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Connexion d'un utilisateur
+// Route POST pour la connexion
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
+    console.log('Email envoyé:', email); // Vérifie que l'email est reçu
+    console.log('Mot de passe envoyé:', password); // Vérifie que le mot de passe est reçu
+
   try {
-    // Vérification de l'existence de l'utilisateur
-    const user = await User.findOne({ email });
+    // Vérifier si l'utilisateur existe dans la base de données
+    let user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Vérification du mot de passe
+    // Vérifier si le mot de passe correspond
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Génération du token JWT
+    // Si les identifiants sont corrects, générer un token JWT
     const payload = {
       user: {
         id: user.id,
-        role: user.role,
-      },
+        role: user.role
+      }
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
+    // Retourner le token JWT au client
     res.json({ token });
   } catch (err) {
     console.error(err.message);
