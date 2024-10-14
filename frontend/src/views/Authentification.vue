@@ -56,8 +56,11 @@
             email: this.email,
             password: this.password
           });
+          console.log('Response from login:', response.data); // Voir si le rôle est bien dans la réponse
+
   
           localStorage.setItem('token', response.data.token);
+              // Stocker le rôle de l'utilisateur
           this.$router.push({ name: 'home' });
         } catch (err) {
           this.error = 'Invalid credentials. Please try again.';
