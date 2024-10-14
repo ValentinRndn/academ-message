@@ -1,12 +1,10 @@
 <template>
   <div>
     <Navbar></Navbar>
-    <h1>Bienvenue sur la page protégée !</h1>
-
     <!-- Afficher le dashboard approprié en fonction du rôle de l'utilisateur -->
-    <adminDashboard v-if="userRole === 'admin'"></adminDashboard>
-    <clientDashboard v-if="userRole === 'client'"></clientDashboard>
-    <professorDashboard v-if="userRole === 'professor'"></professorDashboard>
+    <!-- <adminDashboard v-if="userRole === 'admin'"></adminDashboard> -->
+    <!-- <clientDashboard v-if="userRole === 'client'"></clientDashboard> -->
+    <clientDashboard></clientDashboard>
     <p v-if="!userRole">Aucun rôle défini ou utilisateur non authentifié.</p>
   </div>
 </template>
