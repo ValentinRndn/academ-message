@@ -11,4 +11,13 @@
 
 
 @layer utilities {
+
+}
+
+.form-group {
+  @apply mb-1 text-left;
+}
+
+.label-form {
+  @apply block mb-1 font-bold  text-gray-800;
 }

@@ -1,42 +1,45 @@
-import { createApp } from 'vue'
-import './style.css'
-import App from './App.vue'
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from './views/Home.vue'; // Vérifie que ce fichier existe
-import Authentification from './views/Authentification.vue'; // Vérifie que ce fichier existe
+import { createApp } from 'vue'; // Import correct pour Vue 3
+import './style.css';
+import App from './App.vue';
+import { createRouter, createWebHistory } from 'vue-router'; // Import correct pour Vue Router 4
+import Home from './views/Home.vue';
+import Authentification from './views/Authentification.vue';
 
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHistory(), // Utiliser createWebHistory pour Vue Router 4
     routes: [
         {
             path: '/home',
+            name: 'home',
             component: Home,
             meta: {
-                requiresAuth: true
+                requiresAuth: true // Route protégée
             }
         },
         {
             path: '/',
+            name: 'auth',
             component: Authentification
-        },
+        }
     ]
-})
+});
 
 // Middleware global pour vérifier l'authentification avant d'accéder aux routes protégées
 router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresAuth)) {
       const token = localStorage.getItem('token');
-  
+    
       if (!token) {
-        next({ name: 'auth' });
+        next({ name: 'auth' }); // Rediriger vers la page de connexion si pas de token
       } else {
-        next();
+        next(); // Continuer si l'utilisateur est authentifié
       }
     } else {
-      next();
+      next(); // Continuer si la route n'est pas protégée
     }
   });
+  
 
 
-createApp(App).use(router).mount('#app')
+createApp(App).use(router).mount('#app');
