@@ -13,10 +13,27 @@
             <a href="#" class="text-gray-500 hover:text-gray-900">Professeurs</a>
             <a href="#" class="text-gray-500 hover:text-gray-900">À propos</a>
           </div>
-          <!-- Boutons d'authentification pour petits écrans -->
+  
+          <!-- Boutons d'authentification ou photo de profil -->
           <div class="flex md:hidden items-center space-x-4">
-            <button @click="goToLogin" class="text-gray-500 border border-gray-500 p-2 hover:text-gray-900">Se connecter | Se connecter</button>
+            <template v-if="isAuthenticated">
+                <div class="profil-container flex items-center justify-center">
+              <img
+                src="../assets/profil/pp.avif"
+                alt="Profile"
+                class="w-10 h-10 rounded-full border border-gray-300"
+                @click="goToProfile"
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m12 15.4l-6-6L7.4 8l4.6 4.6L16.6 8L18 9.4z"/></svg>
+            </div>
+            </template>
+            <template v-else>
+              <button @click="goToLogin" class="text-gray-500 border border-gray-500 p-2 hover:text-gray-900">
+                Se connecter | S'inscrire
+              </button>
+            </template>
           </div>
+  
           <!-- Mobile Menu Button pour grands écrans -->
           <div class="hidden md:flex items-center">
             <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="text-gray-500 hover:text-gray-900 focus:outline-none">
@@ -48,21 +65,39 @@
   export default {
     data() {
       return {
-        isMobileMenuOpen: false
+        isMobileMenuOpen: false,
+        isAuthenticated: false, // État pour vérifier si l'utilisateur est connecté
+        userProfilePicture: '' // URL de la photo de profil
       };
     },
+    mounted() {
+      this.checkAuthStatus();
+    },
     methods: {
+      // Méthode pour vérifier si l'utilisateur est authentifié
+      checkAuthStatus() {
+        const token = localStorage.getItem('token');
+        if (token) {
+          this.isAuthenticated = true;
+          // Supposons que la photo de profil est stockée ou que tu l'appelles via une API
+          this.userProfilePicture = localStorage.getItem('userProfilePicture') || 'default-profile-pic-url.jpg';
+        }
+      },
       goToLogin() {
-        this.$router.push({ name: 'auth' }); // Rediriger vers la page de connexion
+        this.$router.push({ name: 'auth' });
       },
       goToSignup() {
-        this.$router.push({ name: 'signup' }); // Rediriger vers la page d'inscription
+        this.$router.push({ name: 'signup' });
+      },
+      goToProfile() {
+        // Redirige vers la page de profil utilisateur
+        this.$router.push({ name: 'profile' });
       }
     }
-  }
+  };
   </script>
   
   <style scoped>
-  /* Ajout d'un style spécifique pour une meilleure lisibilité */
+  /* Styles additionnels pour la photo de profil et les boutons */
   </style>
   

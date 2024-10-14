@@ -10,7 +10,7 @@ const router = createRouter({
     history: createWebHistory(), // Utiliser createWebHistory pour Vue Router 4
     routes: [
         {
-            path: '/home',
+            path: '/',
             name: 'home',
             component: Home,
             meta: {
@@ -18,7 +18,7 @@ const router = createRouter({
             }
         },
         {
-            path: '/',
+            path: '/auth',
             name: 'auth',
             component: Authentification
         }

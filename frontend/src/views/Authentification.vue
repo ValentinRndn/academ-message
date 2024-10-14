@@ -1,5 +1,5 @@
 <template>
-    <div class="auth-container flex justify-center items-center min-h-[100vh] bg-red-200">
+    <div class="auth-container flex justify-center items-center min-h-[100vh] bg-gray-200">
       <div class="auth-card bg-white p-4 rounded-lg w-full max-w-[400px] text-center">
         <h2 class="mb-2 text-xl font-semibold">{{ isLogin ? 'Connexion' : 'Inscription' }}</h2>
   
@@ -20,7 +20,7 @@
             <input type="password" v-model="confirmPassword" placeholder="Confirmer votre mot de passe" required />
           </div>
   
-          <button type="submit" class="auth-button bg-red-400 hover:bg-red-600 text-white p-2 w-full border-none rounded-lg cursor-pointer">
+          <button type="submit" class="auth-button bg-gray-400 hover:bg-gray-600 text-white p-2 w-full border-none rounded-lg cursor-pointer">
             {{ isLogin ? 'Se connecter' : "S'inscrire" }}
           </button>
         </form>
@@ -30,7 +30,7 @@
         <!-- Lien pour basculer entre Connexion et Inscription -->
         <p class="toggle-auth mt-8">
           {{ isLogin ? "Pas de compte ?" : "Déjà un compte ?" }}
-          <a class="text-red-400 hover:underline" href="#" @click.prevent="isLogin = !isLogin">{{ isLogin ? "S'inscrire" : "Se connecter" }}</a>
+          <a class="text-gray-400 hover:underline" href="#" @click.prevent="isLogin = !isLogin">{{ isLogin ? "S'inscrire" : "Se connecter" }}</a>
         </p>
       </div>
     </div>
