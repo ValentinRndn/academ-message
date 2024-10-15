@@ -24,66 +24,72 @@
   </template>
   
   <script setup>
-  import { ref, onMounted } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
-  import axios from 'axios';
-  import { decodeJwt } from '../services/decodeJwt'; // Assurez-vous d'importer la fonction decodeJwt
-  
-  // Récupérer l'utilisateur connecté via le token JWT
-  const token = localStorage.getItem('token');
-  let userId = null;
-  
-  if (token) {
-    const decodedToken = decodeJwt(token); // Décoder le token pour obtenir l'ID de l'utilisateur
-    userId = decodedToken?.user?.id;
-    console.log('User ID récupéré depuis le token:', userId);
-  } else {
-    console.error('Aucun token JWT trouvé.');
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import axios from 'axios';
+import { decodeJwt } from '../services/decodeJwt'; // Assurez-vous d'importer la fonction decodeJwt
+
+// Récupérer l'utilisateur connecté via le token JWT
+const token = localStorage.getItem('token');
+let userId = null;
+
+if (token) {
+  const decodedToken = decodeJwt(token); // Décoder le token pour obtenir l'ID de l'utilisateur
+  userId = decodedToken?.user?.id;
+  console.log('User ID récupéré depuis le token:', userId);
+} else {
+  console.error('Aucun token JWT trouvé.');
+}
+
+// Récupérer l'ID du professeur depuis l'URL
+const route = useRoute();
+const router = useRouter();
+const professorId = route.params.id; // ID du professeur à partir de l'URL
+
+// Stocker les détails du professeur
+const professor = ref(null);
+
+// Appeler l'API pour obtenir les détails du professeur
+onMounted(async () => {
+  try {
+    const response = await axios.get(`http://localhost:5000/api/users/${professorId}`);
+    professor.value = response.data;
+  } catch (error) {
+    console.error('Erreur lors de la récupération du professeur:', error);
   }
-  
-  // Récupérer l'ID du professeur depuis l'URL
-  const route = useRoute();
-  const router = useRouter();
-  const professorId = route.params.id;
-  
-  // Stocker les détails du professeur
-  const professor = ref(null);
-  
-  // Appeler l'API pour obtenir les détails du professeur
-  onMounted(async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/users/${professorId}`);
-      professor.value = response.data;
-    } catch (error) {
-      console.error('Erreur lors de la récupération du professeur:', error);
-    }
-  });
-  
-  // Méthode pour retourner à la liste des professeurs
-  const goBack = () => {
-    router.push({ name: 'professors' });
-  };
-  
-  // Créer une conversation entre l'utilisateur connecté et le professeur
-  const createConversation = async (professorId) => {
-    if (!userId) {
-      alert('Utilisateur non connecté ou ID introuvable.');
-      return;
-    }
-  
-    try {
-      const response = await axios.post('http://localhost:5000/api/conversations', {
-        participants: [userId, professorId] // Utiliser l'ID de l'utilisateur récupéré
-      });
-      alert('Conversation créée avec succès');
-      // Rediriger vers la page de conversation
-      router.push({ name: 'conversationDetail', params: { id: response.data._id } });
-    } catch (error) {
-      console.error('Erreur lors de la création de la conversation:', error);
-      alert('Erreur lors de la création de la conversation');
-    }
-  };
-  </script>
+
+  console.log("Professeur ID:" ,professorId);
+});
+
+// Méthode pour retourner à la liste des professeurs
+const goBack = () => {
+  router.push({ name: 'professors' });
+};
+
+// Créer une conversation entre l'utilisateur connecté et le professeur
+const createConversation = async (professorId) => {
+  if (!userId || !professorId) {
+    alert('Utilisateur ou professeur non trouvé.');
+    return;
+  }
+
+  // Ajout de logs pour confirmer les ID envoyés
+  console.log('User ID:', userId); // ID de l'utilisateur connecté
+  console.log('Professor ID:', professorId); // ID du professeur
+
+  try {
+    const response = await axios.post('http://localhost:5000/api/conversations', {
+      participants: [userId, professorId], // Les deux ID doivent être différents
+    });
+
+    // Rediriger vers la page de la conversation créée
+  } catch (error) {
+    console.error('Erreur lors de la création de la conversation:', error);
+    alert('Erreur lors de la création de la conversation');
+  }
+};
+
+</script>
   
   <style scoped>
   /* Styles simples pour les détails du professeur */

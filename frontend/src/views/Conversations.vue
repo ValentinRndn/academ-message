@@ -106,38 +106,34 @@
     socket.emit('join-conversation', conversationId); // Rejoindre la salle de la conversation via Socket.IO
   };
   
-  // Envoyer un message
   const sendMessage = async () => {
-    if (newMessage.value.trim() !== '' && selectedConversation.value) {
-      const message = {
-        sender: userId,
+  if (newMessage.value.trim() !== '' && selectedConversation.value) {
+    const message = {
+      sender: userId, // Utilisateur connecté qui envoie le message
+      text: newMessage.value,
+    };
+
+    try {
+      // Envoyer le message au backend
+      await axios.post(`http://localhost:5000/api/conversations/${selectedConversationId.value}/message`, {
+        senderId: userId,
         text: newMessage.value,
-      };
-  
-      // Envoyer le message au serveur via Socket.IO et sauvegarder dans MongoDB
-      socket.emit('new-message', {
-        conversationId: selectedConversationId.value,
-        message,
       });
-  
-      try {
-        await axios.post(`http://localhost:5000/api/conversations/${selectedConversationId.value}/message`, {
-          senderId: userId,
-          text: newMessage.value,
-        });
-  
-        // Ajouter localement le message dans la conversation sélectionnée
-        selectedConversation.value.messages.push({
-          sender: { _id: userId, name: 'Moi' },
-          text: newMessage.value,
-        });
-        newMessage.value = ''; // Réinitialiser le champ de saisie après envoi
-      } catch (error) {
-        console.error('Erreur lors de l\'envoi du message', error);
-      }
+
+      // Ajouter le message localement à la conversation
+      selectedConversation.value.messages.push({
+        sender: { _id: userId, name: 'Moi' }, // Afficher 'Moi' pour l'utilisateur connecté
+        text: newMessage.value,
+      });
+
+      // Réinitialiser le champ de saisie
+      newMessage.value = '';
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi du message', error);
     }
-  };
-  
+  }
+};
+
   // Réception d'un message en temps réel via Socket.IO
   socket.on('message-received', (message) => {
     if (selectedConversation.value && selectedConversationId.value === message.conversationId) {
