@@ -34,20 +34,18 @@ app.use(express.json()); // Middleware pour traiter les JSON
 app.use('/api/auth', require('./routes/authRoute'));
 app.use('/api/users', require('./routes/userRoute')); // Route des utilisateurs
 app.use('/api/conversations', require('./routes/conversationRoute')); // Route des conversations
+app.use('/uploads', express.static('uploads'));
 
 // Socket.IO pour gérer les messages en temps réel
 io.on('connection', (socket) => {
-  console.log('Un utilisateur s\'est connecté:', socket.id);
 
   // Rejoindre une conversation
   socket.on('join-conversation', (conversationId) => {
     socket.join(conversationId);
-    console.log(`Utilisateur ${socket.id} a rejoint la conversation: ${conversationId}`);
   });
 
   // Recevoir un nouveau message
   socket.on('new-message', async ({ conversationId, message }) => {
-    console.log(`Nouveau message dans la conversation ${conversationId}:`, message);
 
     try {
       // Rechercher la conversation par ID

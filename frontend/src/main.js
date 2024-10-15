@@ -7,6 +7,7 @@ import Authentification from './views/Authentification.vue';
 import Professors from './views/Professors.vue';
 import ProfessorDetail from './components/ProfessorDetail.vue';
 import Conversations from './views/Conversations.vue';
+import profileParameter from './views/ProfileParameter.vue';
 
 const router = createRouter({
     history: createWebHistory(), // Utiliser createWebHistory pour Vue Router 4
@@ -41,6 +42,11 @@ const router = createRouter({
           path: '/conversations',
           name: 'conversations',
           component: Conversations,
+        },
+        {
+          path: '/profileParameter',
+          name: 'profileParameter',
+          component: profileParameter,
         },
     ]
 });

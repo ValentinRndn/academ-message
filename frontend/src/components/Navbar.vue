@@ -39,7 +39,7 @@
               <div v-if="isProfileMenuOpen" class="absolute right-0 mt-32 w-48 bg-white shadow-lg rounded-md z-20">
                 <ul class="py-1 text-gray-700">
                   <li>
-                    <a @click="goToProfile" class="block px-4 py-2 hover:bg-gray-100 cursor-pointer">Paramètre profil</a>
+                    <router-link to="profileParameter" class="block px-4 py-2 hover:bg-gray-100 cursor-pointer">Paramètre profil</router-link>
                   </li>
                   <li>
                     <a @click="logout" class="block px-4 py-2 hover:bg-gray-100 cursor-pointer">Se déconnecter</a>
@@ -82,6 +82,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -100,11 +102,22 @@ export default {
       const token = localStorage.getItem('token');
       if (token) {
         this.isAuthenticated = true;
-        // Supposons que la photo de profil est stockée ou que tu l'appelles via une API
-        this.userProfilePicture = localStorage.getItem('userProfilePicture') || 'default-profile-pic-url.jpg';
+
+        // Faire une requête pour obtenir le profil utilisateur
+        axios.get('http://localhost:5000/api/users/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        })
+        .then((response) => {
+          this.userProfilePicture = `http://localhost:5000/uploads/${response.data.profilePicture}`;
+        })
+        .catch((error) => {
+          console.error('Erreur lors de la récupération des informations du profil:', error);
+          this.userProfilePicture = 'default-profile-pic-url.jpg'; // Image par défaut si erreur
+        });
       }
     },
-    // Méthode pour gérer l'ouverture/fermeture du menu profil
     toggleProfileMenu() {
       this.isProfileMenuOpen = !this.isProfileMenuOpen;
     },
@@ -113,10 +126,6 @@ export default {
     },
     goToSignup() {
       this.$router.push({ name: 'signup' });
-    },
-    goToProfile() {
-      // Redirige vers la page de profil utilisateur
-      this.$router.push({ name: 'profile' });
     },
     logout() {
       // Supprimer le token et déconnecter l'utilisateur
@@ -130,7 +139,6 @@ export default {
 </script>
 
 <style scoped>
-/* Styles additionnels pour la photo de profil, le menu déroulant et les boutons */
 .profil-container {
   position: relative;
 }

@@ -4,6 +4,60 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const checkAdmin = require('../middleware/checkAdmin');
+const multer = require('multer');
+
+
+
+// Configuration de multer pour stocker les images
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Dossier où les images seront stockées
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}_${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
+
+// Route protégée pour mettre à jour le profil utilisateur
+router.post('/updateProfile', [auth, upload.single('profilePicture')], async (req, res) => {
+  try {
+    const userId = req.user.id; // Récupérer l'utilisateur à partir du middleware auth
+    const { name, email, password } = req.body;
+    let updateData = { name, email };
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+    }
+
+    if (req.file) {
+      updateData.profilePicture = req.file.filename; // Ajouter l'image si elle existe
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+
+    res.status(200).json({ message: 'Profil mis à jour avec succès', user: updatedUser });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du profil', error);
+    res.status(500).json({ message: 'Erreur serveur lors de la mise à jour du profil' });
+  }
+});
+
+// Route pour récupérer le profil utilisateur
+router.get('/profile', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération des informations du profil' });
+  }
+});
+
+
+
+
+
 
 // Route protégée pour récupérer tous les utilisateurs (accessible uniquement aux admins)
 router.get('/users', auth, async (req, res) => {
@@ -52,10 +106,6 @@ router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
   }
 });
 
-// Route GET pour récupérer des informations utilisateurs protégée par JWT
-router.get('/profile', auth, (req, res) => {
-  res.json({ message: `User profile for ID ${req.user.id}` });
-});
 
 // Route pour récupérer tous les utilisateurs avec le rôle "professor"
 router.get('/professors', async (req, res) => {
