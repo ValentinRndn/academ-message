@@ -12,14 +12,19 @@
           :class="{'bg-slate-200': selectedConversationId === conversation._id}"
           @click="selectConversation(conversation._id)"
         >
-          <h3 class="font-semibold">{{ conversation.participants[0].name }}</h3> <!-- Affiche le nom de l'autre participant -->
+          <!-- Exclure l'utilisateur connecté pour afficher l'autre participant -->
+          <h3 class="font-semibold">
+            {{ getOtherParticipant(conversation.participants).name }}
+          </h3>
           <p class="text-sm text-gray-600">{{ conversation.messages[conversation.messages.length - 1]?.text }}</p>
         </div>
       </div>
   
       <!-- Zone de la conversation sélectionnée (droite) -->
       <div class="conversation-detail w-3/4 p-4 flex flex-col">
-        <h2 class="text-xl font-bold mb-4" v-if="selectedConversation">{{ selectedConversation.participants[0].name }}</h2>
+        <h2 class="text-xl font-bold mb-4" v-if="selectedConversation">
+          {{ getOtherParticipant(selectedConversation.participants).name }}
+        </h2>
   
         <div v-if="selectedConversation" class="flex flex-col h-full">
           <!-- Liste des messages -->
@@ -29,7 +34,9 @@
               :key="message._id"
               class="message-item mb-2"
             >
-              <p class="text-sm"><strong>{{ message.sender.name }} :</strong> {{ message.text }}</p>
+              <p class="text-sm">
+                <strong>{{ message.sender.name }} :</strong> {{ message.text }}
+              </p>
             </div>
           </div>
   
@@ -63,22 +70,13 @@
   import { io } from 'socket.io-client';
   import axios from 'axios';
   import Navbar from '../components/Navbar.vue';
-  import { decodeJwt } from '../services/decodeJwt'; // Assurez-vous que la fonction decodeJwt est bien importée
+  import { decodeJwt } from '../services/decodeJwt'; // Assurez-vous que ce chemin est correct
   
   // Connexion au serveur Socket.IO
   const socket = io('http://localhost:5000');
   
-  // Charger l'utilisateur connecté depuis le token JWT (après authentification)
-  const token = localStorage.getItem('token');
-  let userId = null;
-  
-  if (token) {
-    const decodedToken = decodeJwt(token);
-    userId = decodedToken?.user?.id; // Assurez-vous que l'ID est bien récupéré depuis le token décodé
-    console.log("User ID récupéré depuis le token:", userId);
-  } else {
-    console.error('Aucun token JWT trouvé.');
-  }
+  // Charger l'utilisateur connecté depuis le localStorage (après authentification)
+  let userId;
   
   // État pour les conversations et la conversation sélectionnée
   const conversations = ref([]);
@@ -92,6 +90,25 @@
   
   // Charger les conversations depuis MongoDB via l'API
   const loadConversations = async () => {
+    const token = localStorage.getItem('token'); // Récupérer le token JWT depuis le localStorage
+  
+    if (!token) {
+      console.error('Aucun token JWT trouvé.');
+      return;
+    }
+  
+    // Utiliser ta méthode pour décoder le token et extraire l'userId
+    const decodedToken = decodeJwt(token); // Utiliser decodeJwt, pas decodeJWT
+    userId = decodedToken.user.id; // Utiliser let userId défini en dehors
+  
+    // Log pour vérifier que l'userId est correctement extrait
+    console.log('User ID extrait depuis le token JWT:', userId);
+  
+    if (!userId) {
+      console.error('Aucun userId trouvé dans le token.');
+      return;
+    }
+  
     try {
       const response = await axios.get(`http://localhost:5000/api/conversations/${userId}`);
       conversations.value = response.data;
@@ -106,40 +123,39 @@
     socket.emit('join-conversation', conversationId); // Rejoindre la salle de la conversation via Socket.IO
   };
   
+  // Fonction pour obtenir l'autre participant (le professeur) en excluant l'utilisateur connecté
+  const getOtherParticipant = (participants) => {
+    return participants.find(participant => participant._id !== userId); // Exclure l'utilisateur connecté
+  };
+  
+  // Envoyer un message
   const sendMessage = async () => {
-  if (newMessage.value.trim() !== '' && selectedConversation.value) {
-    const message = {
-      sender: userId, // Utilisateur connecté qui envoie le message
-      text: newMessage.value,
-    };
-
-    try {
-      // Envoyer le message au backend
-      await axios.post(`http://localhost:5000/api/conversations/${selectedConversationId.value}/message`, {
-        senderId: userId,
+    if (newMessage.value.trim() !== '' && selectedConversation.value) {
+      const message = {
+        sender: userId,
         text: newMessage.value,
-      });
-
-      // Ajouter le message localement à la conversation
-      selectedConversation.value.messages.push({
-        sender: { _id: userId, name: 'Moi' }, // Afficher 'Moi' pour l'utilisateur connecté
-        text: newMessage.value,
-      });
-
-      // Réinitialiser le champ de saisie
-      newMessage.value = '';
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi du message', error);
+      };
+  
+      try {
+        // Envoyer le message au backend
+        await axios.post(`http://localhost:5000/api/conversations/${selectedConversationId.value}/message`, {
+          senderId: userId,
+          text: newMessage.value,
+        });
+  
+        // Ajouter localement le message à la conversation sélectionnée
+        selectedConversation.value.messages.push({
+          sender: { _id: userId, name: 'Moi' }, // Afficher 'Moi' pour l'utilisateur connecté
+          text: newMessage.value,
+        });
+  
+        // Réinitialiser le champ de saisie
+        newMessage.value = '';
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi du message', error);
+      }
     }
-  }
-};
-
-  // Réception d'un message en temps réel via Socket.IO
-  socket.on('message-received', (message) => {
-    if (selectedConversation.value && selectedConversationId.value === message.conversationId) {
-      selectedConversation.value.messages.push(message);
-    }
-  });
+  };
   
   // Charger les conversations à l'initialisation
   onMounted(() => {
@@ -183,4 +199,3 @@
     background-color: white;
   }
   </style>
-  
