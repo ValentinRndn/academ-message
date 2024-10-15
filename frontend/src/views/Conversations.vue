@@ -26,7 +26,7 @@
           {{ getOtherParticipant(selectedConversation.participants).name }}
           <button
               v-if="userRole !== 'professor'"
-              @click="openReservationModal"
+              @click="openBookingModal"
               class="bg-green-500 text-white ml-4 px-2 py-1 rounded hover:bg-green-600"
             >
               Réserver
@@ -70,30 +70,32 @@
         </div>
       </div>
 
-      <!-- Modal de réservation -->
-      <div v-if="isReservationModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white p-6 rounded-lg w-1/2">
-          <h2 class="text-2xl font-bold mb-4">Réserver un cours</h2>
-          <form @submit.prevent="submitReservation">
-            <div class="mb-4">
-              <label class="block text-gray-700">Date</label>
-              <input type="date" v-model="reservation.date" class="border p-2 w-full rounded" required />
-            </div>
-            <div class="mb-4">
-              <label class="block text-gray-700">Créneau horaire</label>
-              <input type="time" v-model="reservation.time" class="border p-2 w-full rounded" required />
-            </div>
-            <div class="mb-4">
-              <label class="block text-gray-700">Coordonnées bancaires</label>
-              <input type="text" v-model="reservation.paymentInfo" placeholder="Numéro de carte" class="border p-2 w-full rounded" required />
-            </div>
-            <div class="flex justify-end">
-              <button @click="closeReservationModal" class="mr-2 bg-gray-500 text-white px-4 py-2 rounded">Annuler</button>
-              <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Confirmer la réservation</button>
-            </div>
-          </form>
-        </div>
-      </div>
+      <template>
+  <div v-if="userRole !== 'professor'" class="booking-section">
+    <button @click="openBookingModal" class="bg-green-500 text-white p-2 rounded-md">
+      Réserver une session
+    </button>
+
+    <!-- Modal de réservation -->
+    <div v-if="isBookingModalOpen" class="modal">
+      <!-- Formulaire pour choisir la date et le créneau -->
+      <label>Date:</label>
+      <input type="date" v-model="bookingDate" />
+      <label>Heure:</label>
+      <input type="time" v-model="bookingTime" />
+      <!-- Entrée des coordonnées bancaires -->
+      <label>Numéro de carte:</label>
+      <input type="text" v-model="cardNumber" placeholder="5555 5555 5555 4444" />
+      <label>Date d'expiration:</label>
+      <input type="text" v-model="expiryDate" placeholder="MM/YY" />
+      <label>CVV:</label>
+      <input type="text" v-model="cvv" placeholder="123" />
+
+      <button @click="bookSession" class="bg-blue-500 text-white p-2 rounded-md">Confirmer la réservation</button>
+    </div>
+  </div>
+</template>
+
 
     </div>
   </template>
@@ -122,8 +124,8 @@
   const newMessage = ref('');
 
     // État pour la réservation
-    const isReservationModalOpen = ref(false);
-  const reservation = ref({
+    const isBookingModalOpen = ref(false);
+  const Booking = ref({
     date: '',
     time: '',
     paymentInfo: ''
@@ -199,19 +201,19 @@
   };
 
   // Fonction pour ouvrir le modal de réservation
-  const openReservationModal = () => {
-    isReservationModalOpen.value = true;
+  const openBookingModal = () => {
+    isBookingModalOpen.value = true;
   };
   
   // Fonction pour fermer le modal de réservation
-  const closeReservationModal = () => {
-    isReservationModalOpen.value = false;
+  const closeBookingModal = () => {
+    isBookingModalOpen.value = false;
   };
   
   // Fonction pour soumettre la réservation
-  const submitReservation = () => {
-    alert(`Réservation confirmée pour le ${reservation.value.date} à ${reservation.value.time}`);
-    closeReservationModal();
+  const submitBooking = () => {
+    alert(`Réservation confirmée pour le ${Booking.value.date} à ${Booking.value.time}`);
+    closeBookingModal();
   };
   
   // Charger les conversations à l'initialisation
