@@ -19,7 +19,7 @@ router.get('/users', auth, async (req, res) => {
 
 // Route pour permettre à un admin de créer un professeur
 router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, subject, password, bio } = req.body;
 
   try {
     // Vérifier si l'utilisateur existe déjà
@@ -32,7 +32,9 @@ router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
     user = new User({
       name,
       email,
+      subject,
       password,
+      bio,
       role: 'professor' // Spécifier le rôle de professeur
     });
 
