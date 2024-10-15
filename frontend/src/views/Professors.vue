@@ -15,11 +15,11 @@
       </div>
   
       <!-- Liste des professeurs -->
-      <div v-if="filteredProfessors.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-if="filteredProfessors.length > 0" class="flex justify-center w-full h-full flex-wrap gap-6">
         <div
           v-for="professor in filteredProfessors"
           :key="professor.id"
-          class="professor-card bg-white p-4 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow duration-200"
+          class="professor-card bg-white p-4 w-[400px] h-[200px] rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow duration-200"
           @click="goToProfessorDetail(professor.id)"
         >
           <h2 class="text-xl font-bold text-gray-800">{{ professor.name }}</h2>
@@ -46,6 +46,10 @@ import Navbar from '../components/Navbar.vue';
     { id: 3, name: 'Albert Einstein', subject: 'Physique' },
     { id: 4, name: 'Sophie Germain', subject: 'Mathématiques' },
     { id: 5, name: 'René Descartes', subject: 'Philosophie' },
+    { id: 6, name: 'René Descartes', subject: 'Philosophie' },
+    { id: 7, name: 'René Descartes', subject: 'Philosophie' },
+    { id: 8, name: 'René Descartes', subject: 'Philosophie' },
+
   ]);
   
   // État pour la barre de recherche

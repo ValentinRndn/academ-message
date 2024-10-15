@@ -12,7 +12,7 @@
   
       <!-- Bouton de retour -->
       <div class="mt-6">
-        <button @click="goBack" class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">
+        <button @click="goBack" class="bg-red-500 text-white p-2 rounded-md hover:bg-blue-600">
           Retour à la liste des professeurs
         </button>
       </div>
@@ -52,7 +52,7 @@
   
   // Méthode pour retourner à la liste des professeurs
   const goBack = () => {
-    router.push({ name: 'professorList' });
+    router.push({ name: 'professors' });
   };
   </script>
   
