@@ -5,6 +5,10 @@ const { Server } = require('socket.io');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db'); // Connexion à MongoDB
 
+// Import des modèles
+const Conversation = require('./models/Conversation');
+const User = require('./models/User');
+
 dotenv.config();
 connectDB(); // Connexion à MongoDB
 
@@ -17,7 +21,19 @@ const io = new Server(server, {
   }
 });
 
-const conversations = {};
+// Middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // L'origine de ton frontend Vue.js
+  methods: 'GET,POST,PUT,DELETE', // Méthodes HTTP autorisées
+  credentials: true // Si tu veux envoyer des cookies (optionnel)
+}));
+
+app.use(express.json()); // Middleware pour traiter les JSON
+
+// Routes
+app.use('/api/auth', require('./routes/authRoute'));
+app.use('/api/users', require('./routes/userRoute')); // Route des utilisateurs
+app.use('/api/conversations', require('./routes/conversationRoute')); // Route des conversations
 
 // Socket.IO pour gérer les messages en temps réel
 io.on('connection', (socket) => {
@@ -30,17 +46,29 @@ io.on('connection', (socket) => {
   });
 
   // Recevoir un nouveau message
-  socket.on('new-message', ({ conversationId, message }) => {
+  socket.on('new-message', async ({ conversationId, message }) => {
     console.log(`Nouveau message dans la conversation ${conversationId}:`, message);
 
-    // Sauvegarder le message dans la conversation (simuler)
-    if (!conversations[conversationId]) {
-      conversations[conversationId] = [];
-    }
-    conversations[conversationId].push(message);
+    try {
+      // Rechercher la conversation par ID
+      const conversation = await Conversation.findById(conversationId);
 
-    // Émettre le message à tous les utilisateurs de la conversation
-    io.to(conversationId).emit('message-received', message);
+      if (conversation) {
+        // Ajouter le message à la conversation
+        conversation.messages.push({
+          sender: message.sender, // ID de l'utilisateur envoyant le message
+          text: message.text,
+          createdAt: new Date(),
+        });
+
+        await conversation.save(); // Sauvegarder la conversation
+
+        // Émettre le message à tous les utilisateurs de la conversation
+        io.to(conversationId).emit('message-received', message);
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement du message:', error);
+    }
   });
 
   // Déconnexion
@@ -49,20 +77,7 @@ io.on('connection', (socket) => {
   });
 });
 
-
-// Configuration de CORS pour autoriser l'origine http://localhost:5173
-app.use(cors({
-  origin: 'http://localhost:5173', // L'origine de ton frontend Vue.js
-  methods: 'GET,POST,PUT,DELETE', // Méthodes HTTP autorisées
-  credentials: true // Si tu veux envoyer des cookies (optionnel)
-}));
-
-app.use(express.json()); // Middleware pour traiter les JSON
-
-// Routes
-app.use('/api/auth', require('./routes/authRoute'));
-
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

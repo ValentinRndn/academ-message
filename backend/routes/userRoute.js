@@ -5,15 +5,9 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const checkAdmin = require('../middleware/checkAdmin');
 
-
 // Route protégée pour récupérer tous les utilisateurs (accessible uniquement aux admins)
 router.get('/users', auth, async (req, res) => {
   try {
-    // // Vérifie si l'utilisateur connecté est un administrateur (optionnel)
-    // if (req.user.role !== 'admin') {
-    //   return res.status(403).json({ message: 'Access denied' });
-    // }
-
     // Récupérer tous les utilisateurs dans la base de données
     const users = await User.find();
     res.json(users);
@@ -60,5 +54,30 @@ router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
 router.get('/profile', auth, (req, res) => {
   res.json({ message: `User profile for ID ${req.user.id}` });
 });
+
+// Route pour récupérer tous les utilisateurs avec le rôle "professor"
+router.get('/professors', async (req, res) => {
+  try {
+    const professors = await User.find({ role: 'professor' });
+    res.json(professors);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des professeurs :', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération des professeurs' });
+  }
+});
+
+// Route pour récupérer les détails d'un utilisateur par son ID
+router.get('/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Professeur non trouvé' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la récupération du professeur' });
+  }
+});
+
 
 module.exports = router;

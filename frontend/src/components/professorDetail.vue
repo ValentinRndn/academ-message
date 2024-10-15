@@ -10,29 +10,26 @@
         <p class="text-gray-600 mt-2"><strong>Années d'expérience : </strong>{{ professor.experience }} ans</p>
       </div>
   
-      <!-- Bouton de retour -->
-      <div class="mt-6">
+      <!-- Boutons -->
+      <div class="mt-6 flex gap-4">
         <button @click="goBack" class="bg-red-500 text-white p-2 rounded-md hover:bg-blue-600">
           Retour à la liste des professeurs
         </button>
-      </div>
   
-
+        <button v-if="professor" @click="createConversation(professor._id)" class="bg-green-500 text-black p-2 rounded-md hover:bg-green-600">
+          Démarrer une conversation avec {{ professor.name }}
+        </button>
+      </div>
     </div>
   </template>
   
   <script setup>
   import { ref, onMounted } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
   
-  // Simuler les détails des professeurs
-  const professors = [
-    { id: 1, name: 'Jean Dupont', subject: 'Mathématiques', bio: 'Jean est professeur depuis 15 ans...', experience: 15 },
-    { id: 2, name: 'Marie Curie', subject: 'Physique', bio: 'Marie est une scientifique de renom...', experience: 10 },
-    { id: 3, name: 'Albert Einstein', subject: 'Physique', bio: 'Albert a révolutionné le domaine de la physique...', experience: 20 },
-    { id: 4, name: 'Sophie Germain', subject: 'Mathématiques', bio: 'Sophie est une pionnière dans le domaine des mathématiques...', experience: 12 },
-    { id: 5, name: 'René Descartes', subject: 'Philosophie', bio: 'René est un philosophe et mathématicien...', experience: 30 },
-  ];
+  // Récupérer l'utilisateur connecté
+  const userId = localStorage.getItem('userId'); // ID de l'utilisateur connecté
   
   // Récupérer l'ID du professeur depuis l'URL
   const route = useRoute();
@@ -42,17 +39,34 @@
   // Stocker les détails du professeur
   const professor = ref(null);
   
-  // Chercher le professeur correspondant à l'ID
-  onMounted(() => {
-    const foundProfessor = professors.find(p => p.id === parseInt(professorId));
-    if (foundProfessor) {
-      professor.value = foundProfessor;
+  // Appeler l'API pour obtenir les détails du professeur
+  onMounted(async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/users/${professorId}`);
+      professor.value = response.data;
+    } catch (error) {
+      console.error('Erreur lors de la récupération du professeur:', error);
     }
   });
   
   // Méthode pour retourner à la liste des professeurs
   const goBack = () => {
     router.push({ name: 'professors' });
+  };
+  
+  // Créer une conversation entre l'utilisateur connecté et le professeur
+  const createConversation = async (professorId) => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/conversations', {
+        participants: [userId, professorId]
+      });
+      alert('Conversation créée avec succès');
+      // Rediriger vers la page de conversation
+      router.push({ name: 'conversationDetail', params: { id: response.data._id } });
+    } catch (error) {
+      console.error('Erreur lors de la création de la conversation:', error);
+      alert('Erreur lors de la création de la conversation');
+    }
   };
   </script>
   

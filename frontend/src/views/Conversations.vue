@@ -7,29 +7,29 @@
   
         <div
           v-for="conversation in conversations"
-          :key="conversation.id"
+          :key="conversation._id"
           class="conversation-item p-3 mb-2 rounded-lg cursor-pointer hover:bg-gray-200"
-          :class="{'bg-slate-200': selectedConversationId === conversation.id}"
-          @click="selectConversation(conversation.id)"
+          :class="{'bg-slate-200': selectedConversationId === conversation._id}"
+          @click="selectConversation(conversation._id)"
         >
-          <h3 class="font-semibold">{{ conversation.name }}</h3>
-          <p class="text-sm text-gray-600">{{ conversation.lastMessage }}</p>
+          <h3 class="font-semibold">{{ conversation.participants[0].name }}</h3> <!-- Affiche le nom de l'autre participant -->
+          <p class="text-sm text-gray-600">{{ conversation.messages[conversation.messages.length - 1]?.text }}</p>
         </div>
       </div>
   
       <!-- Zone de la conversation sélectionnée (droite) -->
       <div class="conversation-detail w-3/4 p-4 flex flex-col">
-        <h2 class="text-xl font-bold mb-4" v-if="selectedConversation">{{ selectedConversation.name }}</h2>
+        <h2 class="text-xl font-bold mb-4" v-if="selectedConversation">{{ selectedConversation.participants[0].name }}</h2>
   
         <div v-if="selectedConversation" class="flex flex-col h-full">
           <!-- Liste des messages -->
           <div class="messages-container mb-4 flex-grow overflow-y-auto">
             <div
               v-for="message in selectedConversation.messages"
-              :key="message.id"
+              :key="message._id"
               class="message-item mb-2"
             >
-              <p class="text-sm"><strong>{{ message.sender }} :</strong> {{ message.text }}</p>
+              <p class="text-sm"><strong>{{ message.sender.name }} :</strong> {{ message.text }}</p>
             </div>
           </div>
   
@@ -61,84 +61,83 @@
   <script setup>
   import { ref, computed, onMounted } from 'vue';
   import { io } from 'socket.io-client';
+  import axios from 'axios';
   import Navbar from '../components/Navbar.vue';
   
-  const socket = io('http://localhost:5000'); // Connexion au serveur Socket.IO
+  // Connexion au serveur Socket.IO
+  const socket = io('http://localhost:5000');
   
-  // Fausse liste de conversations (à remplacer par une API plus tard)
-  const conversations = ref([
-    {
-      id: 1,
-      name: 'Jean Dupont',
-      lastMessage: 'Merci pour la dernière session !',
-      messages: [
-        { id: 1, sender: 'Jean', text: 'Merci pour la dernière session !' },
-        { id: 2, sender: 'Moi', text: 'Avec plaisir !' },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Marie Curie',
-      lastMessage: 'Je suis disponible demain pour un cours.',
-      messages: [
-        { id: 1, sender: 'Marie', text: 'Je suis disponible demain pour un cours.' },
-        { id: 2, sender: 'Moi', text: 'Super, je note !' },
-      ],
-    },
-    {
-      id: 3,
-      name: 'Albert Einstein',
-      lastMessage: 'Comment se passe la préparation ?',
-      messages: [
-        { id: 1, sender: 'Albert', text: 'Comment se passe la préparation ?' },
-        { id: 2, sender: 'Moi', text: 'Ça avance bien, merci !' },
-      ],
-    },
-  ]);
+  // Charger l'utilisateur connecté depuis le localStorage (après authentification)
+  const userId = localStorage.getItem('userId');
   
+  // État pour les conversations et la conversation sélectionnée
+  const conversations = ref([]);
   const selectedConversationId = ref(null);
   const selectedConversation = computed(() =>
-    conversations.value.find(convo => convo.id === selectedConversationId.value)
+    conversations.value.find(convo => convo._id === selectedConversationId.value)
   );
   
+  // État pour un nouveau message
   const newMessage = ref('');
   
-  // Rejoindre une conversation
-  const selectConversation = (conversationId) => {
-    selectedConversationId.value = conversationId;
-    socket.emit('join-conversation', conversationId); // Rejoindre une salle côté Socket.IO
+  // Charger les conversations depuis MongoDB via l'API
+  const loadConversations = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/conversations/${userId}`);
+      conversations.value = response.data;
+    } catch (error) {
+      console.error('Erreur lors du chargement des conversations', error);
+    }
   };
   
-  // Envoyer un message en temps réel
-  const sendMessage = () => {
+  // Sélectionner une conversation
+  const selectConversation = (conversationId) => {
+    selectedConversationId.value = conversationId;
+    socket.emit('join-conversation', conversationId); // Rejoindre la salle de la conversation via Socket.IO
+  };
+  
+  // Envoyer un message
+  const sendMessage = async () => {
     if (newMessage.value.trim() !== '' && selectedConversation.value) {
       const message = {
-        id: Date.now(), // ID unique
-        sender: 'Moi',
+        sender: userId,
         text: newMessage.value,
       };
   
-      // Envoyer le message au serveur via Socket.IO
+      // Envoyer le message au serveur via Socket.IO et sauvegarder dans MongoDB
       socket.emit('new-message', {
         conversationId: selectedConversationId.value,
         message,
       });
   
-      // Ajouter le message à la conversation localement
-      selectedConversation.value.messages.push(message);
-      newMessage.value = ''; // Réinitialiser le champ de saisie après l'envoi du message
+      try {
+        await axios.post(`http://localhost:5000/api/conversations/${selectedConversationId.value}/message`, {
+          senderId: userId,
+          text: newMessage.value,
+        });
+  
+        // Ajouter localement le message dans la conversation sélectionnée
+        selectedConversation.value.messages.push({
+          sender: { _id: userId, name: 'Moi' },
+          text: newMessage.value,
+        });
+        newMessage.value = ''; // Réinitialiser le champ de saisie après envoi
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi du message', error);
+      }
     }
   };
   
-  // Réception d'un message en temps réel
+  // Réception d'un message en temps réel via Socket.IO
   socket.on('message-received', (message) => {
-    if (selectedConversation.value) {
+    if (selectedConversation.value && selectedConversationId.value === message.conversationId) {
       selectedConversation.value.messages.push(message);
     }
   });
   
+  // Charger les conversations à l'initialisation
   onMounted(() => {
-    console.log('Socket.IO connecté');
+    loadConversations();
   });
   </script>
   

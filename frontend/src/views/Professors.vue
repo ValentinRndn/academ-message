@@ -1,6 +1,6 @@
 <template>
-        <Navbar></Navbar>
-
+    <Navbar></Navbar>
+  
     <div class="p-8 bg-gray-100 min-h-screen">
       <h1 class="text-3xl font-bold text-gray-800 mb-8">Trouvez votre professeur</h1>
   
@@ -18,9 +18,9 @@
       <div v-if="filteredProfessors.length > 0" class="flex justify-center w-full h-full flex-wrap gap-6">
         <div
           v-for="professor in filteredProfessors"
-          :key="professor.id"
+          :key="professor._id"
           class="professor-card bg-white p-4 w-[400px] h-[200px] rounded-lg shadow-md hover:shadow-lg cursor-pointer transition-shadow duration-200"
-          @click="goToProfessorDetail(professor.id)"
+          @click="goToProfessorDetail(professor._id)"
         >
           <h2 class="text-xl font-bold text-gray-800">{{ professor.name }}</h2>
           <p class="text-gray-600">Matière : {{ professor.subject }}</p>
@@ -35,25 +35,36 @@
   </template>
   
   <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
-import Navbar from '../components/Navbar.vue';
+  import axios from 'axios';
+  import Navbar from '../components/Navbar.vue';
   
-  // Fausse liste de professeurs (tu pourras remplacer ça par une requête API)
-  const professors = ref([
-    { id: 1, name: 'Jean Dupont', subject: 'Mathématiques' },
-    { id: 2, name: 'Marie Curie', subject: 'Physique' },
-    { id: 3, name: 'Albert Einstein', subject: 'Physique' },
-    { id: 4, name: 'Sophie Germain', subject: 'Mathématiques' },
-    { id: 5, name: 'René Descartes', subject: 'Philosophie' },
-    { id: 6, name: 'René Descartes', subject: 'Philosophie' },
-    { id: 7, name: 'René Descartes', subject: 'Philosophie' },
-    { id: 8, name: 'René Descartes', subject: 'Philosophie' },
-
-  ]);
+  // État pour la liste des professeurs récupérés via l'API
+  const professors = ref([]);
   
   // État pour la barre de recherche
   const searchQuery = ref('');
+  
+  // Gestion des erreurs d'API
+  const error = ref(null);
+  
+  // Utiliser Vue Router pour rediriger vers la page de détail d'un professeur
+  const router = useRouter();
+  
+  // Appel API pour récupérer les utilisateurs avec le rôle "professor"
+  const fetchProfessors = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/users/professors');
+      professors.value = response.data; // Assurez-vous que l'API renvoie un tableau d'utilisateurs
+    } catch (err) {
+      console.error('Erreur lors de la récupération des professeurs :', err);
+      error.value = 'Erreur lors de la récupération des professeurs';
+    }
+  };
+  
+  // Appel de l'API lorsque le composant est monté
+  onMounted(fetchProfessors);
   
   // Méthode pour filtrer la liste des professeurs en fonction du nom ou de la matière
   const filteredProfessors = computed(() => {
@@ -66,8 +77,7 @@ import Navbar from '../components/Navbar.vue';
     });
   });
   
-  // Utiliser Vue Router pour rediriger vers la page de détail d'un professeur
-  const router = useRouter();
+  // Méthode pour rediriger vers la page de détail du professeur
   const goToProfessorDetail = (professorId) => {
     router.push({ name: 'professorDetail', params: { id: professorId } });
   };
