@@ -24,6 +24,13 @@
       <div class="conversation-detail w-3/4 p-4 flex flex-col">
         <h2 class="text-xl font-bold mb-4" v-if="selectedConversation">
           {{ getOtherParticipant(selectedConversation.participants).name }}
+          <button
+              v-if="userRole !== 'professor'"
+              @click="openReservationModal"
+              class="bg-green-500 text-white ml-4 px-2 py-1 rounded hover:bg-green-600"
+            >
+              Réserver
+            </button>
         </h2>
   
         <div v-if="selectedConversation" class="flex flex-col h-full">
@@ -62,6 +69,32 @@
           <p>Sélectionnez une conversation pour commencer à discuter.</p>
         </div>
       </div>
+
+      <!-- Modal de réservation -->
+      <div v-if="isReservationModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-6 rounded-lg w-1/2">
+          <h2 class="text-2xl font-bold mb-4">Réserver un cours</h2>
+          <form @submit.prevent="submitReservation">
+            <div class="mb-4">
+              <label class="block text-gray-700">Date</label>
+              <input type="date" v-model="reservation.date" class="border p-2 w-full rounded" required />
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700">Créneau horaire</label>
+              <input type="time" v-model="reservation.time" class="border p-2 w-full rounded" required />
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700">Coordonnées bancaires</label>
+              <input type="text" v-model="reservation.paymentInfo" placeholder="Numéro de carte" class="border p-2 w-full rounded" required />
+            </div>
+            <div class="flex justify-end">
+              <button @click="closeReservationModal" class="mr-2 bg-gray-500 text-white px-4 py-2 rounded">Annuler</button>
+              <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Confirmer la réservation</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
     </div>
   </template>
   
@@ -87,6 +120,14 @@
   
   // État pour un nouveau message
   const newMessage = ref('');
+
+    // État pour la réservation
+    const isReservationModalOpen = ref(false);
+  const reservation = ref({
+    date: '',
+    time: '',
+    paymentInfo: ''
+  });
   
   // Charger les conversations depuis MongoDB via l'API
   const loadConversations = async () => {
@@ -155,6 +196,22 @@
         console.error('Erreur lors de l\'envoi du message', error);
       }
     }
+  };
+
+  // Fonction pour ouvrir le modal de réservation
+  const openReservationModal = () => {
+    isReservationModalOpen.value = true;
+  };
+  
+  // Fonction pour fermer le modal de réservation
+  const closeReservationModal = () => {
+    isReservationModalOpen.value = false;
+  };
+  
+  // Fonction pour soumettre la réservation
+  const submitReservation = () => {
+    alert(`Réservation confirmée pour le ${reservation.value.date} à ${reservation.value.time}`);
+    closeReservationModal();
   };
   
   // Charger les conversations à l'initialisation

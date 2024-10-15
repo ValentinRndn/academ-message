@@ -16,7 +16,12 @@
           Retour à la liste des professeurs
         </button>
   
-        <button v-if="professor" @click="createConversation(professor._id)" class="bg-green-500 text-black p-2 rounded-md hover:bg-green-600">
+        <!-- Si l'utilisateur n'est pas un professeur, afficher le bouton de création de conversation -->
+        <button
+          v-if="professor && userRole !== 'professor'"
+          @click="createConversation(professor._id)"
+          class="bg-green-500 text-black p-2 rounded-md hover:bg-green-600"
+        >
           Démarrer une conversation avec {{ professor.name }}
         </button>
       </div>
@@ -32,11 +37,14 @@ import { decodeJwt } from '../services/decodeJwt'; // Assurez-vous d'importer la
 // Récupérer l'utilisateur connecté via le token JWT
 const token = localStorage.getItem('token');
 let userId = null;
+let userRole = null; // Ajouter une variable pour stocker le rôle de l'utilisateur
 
 if (token) {
-  const decodedToken = decodeJwt(token); // Décoder le token pour obtenir l'ID de l'utilisateur
+  const decodedToken = decodeJwt(token); // Décoder le token pour obtenir l'ID et le rôle de l'utilisateur
   userId = decodedToken?.user?.id;
+  userRole = decodedToken?.user?.role; // Récupérer le rôle de l'utilisateur
   console.log('User ID récupéré depuis le token:', userId);
+  console.log('User Role récupéré depuis le token:', userRole);
 } else {
   console.error('Aucun token JWT trouvé.');
 }
@@ -83,6 +91,7 @@ const createConversation = async (professorId) => {
     });
 
     // Rediriger vers la page de la conversation créée
+    router.push({ name: 'conversationDetail', params: { id: response.data._id } });
   } catch (error) {
     console.error('Erreur lors de la création de la conversation:', error);
     alert('Erreur lors de la création de la conversation');
@@ -98,4 +107,3 @@ const createConversation = async (professorId) => {
     margin: 0 auto;
   }
   </style>
-  
