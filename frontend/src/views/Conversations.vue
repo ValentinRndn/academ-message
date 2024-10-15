@@ -18,26 +18,33 @@
       </div>
   
       <!-- Zone de la conversation sélectionnée (droite) -->
-      <div class="conversation-detail w-3/4 p-4">
+      <div class="conversation-detail w-3/4 p-4 flex flex-col">
         <h2 class="text-xl font-bold mb-4" v-if="selectedConversation">{{ selectedConversation.name }}</h2>
   
-        <div v-if="selectedConversation">
+        <div v-if="selectedConversation" class="flex flex-col h-full">
           <!-- Liste des messages -->
-          <div class="messages-container mb-4">
-            <div v-for="message in selectedConversation.messages" :key="message.id" class="message-item mb-2">
+          <div class="messages-container mb-4 flex-grow overflow-y-auto">
+            <div
+              v-for="message in selectedConversation.messages"
+              :key="message.id"
+              class="message-item mb-2"
+            >
               <p class="text-sm"><strong>{{ message.sender }} :</strong> {{ message.text }}</p>
             </div>
           </div>
   
-          <!-- Champ pour envoyer un nouveau message -->
-          <div class="message-input flex">
+          <!-- Champ pour envoyer un nouveau message, fixé en bas -->
+          <div class="message-input flex items-center w-full border-t border-gray-300 p-2">
             <input
               v-model="newMessage"
               type="text"
               placeholder="Écrivez un message..."
               class="w-full p-2 border border-gray-300 rounded-l-lg focus:outline-none"
             />
-            <button @click="sendMessage" class="bg-blue-500 text-black border border-black p-2 rounded-r-lg hover:bg-blue-600">
+            <button
+              @click="sendMessage"
+              class="bg-blue-500 text-black border border-black p-2 rounded-r-lg hover:bg-blue-600"
+            >
               Envoyer
             </button>
           </div>
@@ -52,8 +59,11 @@
   </template>
   
   <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, onMounted } from 'vue';
+  import { io } from 'socket.io-client';
   import Navbar from '../components/Navbar.vue';
+  
+  const socket = io('http://localhost:5000'); // Connexion au serveur Socket.IO
   
   // Fausse liste de conversations (à remplacer par une API plus tard)
   const conversations = ref([
@@ -86,7 +96,6 @@
     },
   ]);
   
-  // État pour la conversation sélectionnée et le nouveau message
   const selectedConversationId = ref(null);
   const selectedConversation = computed(() =>
     conversations.value.find(convo => convo.id === selectedConversationId.value)
@@ -94,22 +103,43 @@
   
   const newMessage = ref('');
   
-  // Sélectionner une conversation
+  // Rejoindre une conversation
   const selectConversation = (conversationId) => {
     selectedConversationId.value = conversationId;
+    socket.emit('join-conversation', conversationId); // Rejoindre une salle côté Socket.IO
   };
   
-  // Envoyer un message
+  // Envoyer un message en temps réel
   const sendMessage = () => {
     if (newMessage.value.trim() !== '' && selectedConversation.value) {
-      selectedConversation.value.messages.push({
-        id: Date.now(), // ID unique basé sur la date actuelle
+      const message = {
+        id: Date.now(), // ID unique
         sender: 'Moi',
         text: newMessage.value,
+      };
+  
+      // Envoyer le message au serveur via Socket.IO
+      socket.emit('new-message', {
+        conversationId: selectedConversationId.value,
+        message,
       });
+  
+      // Ajouter le message à la conversation localement
+      selectedConversation.value.messages.push(message);
       newMessage.value = ''; // Réinitialiser le champ de saisie après l'envoi du message
     }
   };
+  
+  // Réception d'un message en temps réel
+  socket.on('message-received', (message) => {
+    if (selectedConversation.value) {
+      selectedConversation.value.messages.push(message);
+    }
+  });
+  
+  onMounted(() => {
+    console.log('Socket.IO connecté');
+  });
   </script>
   
   <style scoped>
@@ -133,16 +163,19 @@
   .conversation-detail {
     display: flex;
     flex-direction: column;
+    height: 100%;
   }
   
   .messages-container {
     flex-grow: 1;
     overflow-y: auto;
-    max-height: 400px;
+    max-height: calc(100vh - 150px); /* Ajuste la hauteur pour tenir compte de l'input */
   }
   
   .message-input {
-    margin-top: auto;
+    position: sticky;
+    bottom: 0;
+    background-color: white;
   }
   </style>
   
