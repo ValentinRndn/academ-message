@@ -27,9 +27,19 @@
   import { ref, onMounted } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import axios from 'axios';
+  import { decodeJwt } from '../services/decodeJwt'; // Assurez-vous d'importer la fonction decodeJwt
   
-  // Récupérer l'utilisateur connecté
-  const userId = localStorage.getItem('userId'); // ID de l'utilisateur connecté
+  // Récupérer l'utilisateur connecté via le token JWT
+  const token = localStorage.getItem('token');
+  let userId = null;
+  
+  if (token) {
+    const decodedToken = decodeJwt(token); // Décoder le token pour obtenir l'ID de l'utilisateur
+    userId = decodedToken?.user?.id;
+    console.log('User ID récupéré depuis le token:', userId);
+  } else {
+    console.error('Aucun token JWT trouvé.');
+  }
   
   // Récupérer l'ID du professeur depuis l'URL
   const route = useRoute();
@@ -56,9 +66,14 @@
   
   // Créer une conversation entre l'utilisateur connecté et le professeur
   const createConversation = async (professorId) => {
+    if (!userId) {
+      alert('Utilisateur non connecté ou ID introuvable.');
+      return;
+    }
+  
     try {
       const response = await axios.post('http://localhost:5000/api/conversations', {
-        participants: [userId, professorId]
+        participants: [userId, professorId] // Utiliser l'ID de l'utilisateur récupéré
       });
       alert('Conversation créée avec succès');
       // Rediriger vers la page de conversation
