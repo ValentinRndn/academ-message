@@ -4,7 +4,9 @@ import App from './App.vue';
 import { createRouter, createWebHistory } from 'vue-router'; // Import correct pour Vue Router 4
 import Home from './views/Home.vue';
 import Authentification from './views/Authentification.vue';
-
+import Professors from './views/Professors.vue';
+import ProfessorDetail from './components/ProfessorDetail.vue';
+import Conversations from './views/Conversations.vue';
 
 const router = createRouter({
     history: createWebHistory(), // Utiliser createWebHistory pour Vue Router 4
@@ -21,7 +23,25 @@ const router = createRouter({
             path: '/auth',
             name: 'auth',
             component: Authentification
-        }
+        },
+        {
+          path: '/professors',
+          name: 'professors',
+          component: Professors,
+          meta: {
+            // requiresAuth: true // Route protégée
+          }
+        },
+        {
+          path: '/professor/:id',
+          name: 'professorDetail',
+          component: ProfessorDetail,
+        },
+        {
+          path: '/conversations',
+          name: 'conversations',
+          component: Conversations,
+        },
     ]
 });
 
