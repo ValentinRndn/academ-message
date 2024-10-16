@@ -1,17 +1,17 @@
 <template>
-  <nav class="bg-white border-b border-gray-200">
+  <nav class="navbar border-b border-gray-200 backdrop-blur-xl bg-gray-200 bg-opacity-50">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
         <div class="flex-shrink-0 flex items-center">
-          <router-link to="/" class="text-2xl font-bold text-blue-500">Academ-Message</router-link>
+          <router-link to="/" class="text-2xl font-bold text-black">Academ-Message</router-link>
         </div>
 
         <!-- Navigation Links pour petits écrans -->
         <div class="flex md:hidden space-x-8">
-          <router-link to="/" class="text-gray-500 hover:text-gray-900">Accueil</router-link>
-          <router-link to="conversations" class="text-gray-500 hover:text-gray-900">Conversations</router-link>
-          <router-link to="professors" class="text-gray-500 hover:text-gray-900">Professeurs</router-link>
+          <router-link to="/" class="text-gray-600 hover:text-gray-900">Accueil</router-link>
+          <router-link to="conversations" class="text-gray-600 hover:text-gray-900">Conversations</router-link>
+          <router-link to="professors" class="text-gray-600 hover:text-gray-900">Professeurs</router-link>
         </div>
 
         <!-- Boutons d'authentification ou photo de profil -->
@@ -36,7 +36,7 @@
               </svg>
 
               <!-- Menu déroulant -->
-              <div v-if="isProfileMenuOpen" class="absolute right-0 mt-32 w-48 bg-white shadow-lg rounded-md z-20">
+              <div v-if="isProfileMenuOpen" class="absolute right-0 mt-32 w-48 backdrop-blur-xl bg-gray-200 bg-opacity-50 shadow-lg rounded-md z-20">
                 <ul class="py-1 text-gray-700">
                   <li>
                     <router-link to="profileParameter" class="block px-4 py-2 hover:bg-gray-100 cursor-pointer">Paramètre profil</router-link>

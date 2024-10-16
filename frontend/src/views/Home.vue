@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="home-container">
     <Navbar></Navbar>
     <!-- Afficher le dashboard approprié en fonction du rôle de l'utilisateur -->
     <adminDashboard v-if="userRole === 'admin'"></adminDashboard>
@@ -32,5 +32,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Ajout de styles pour les dashboards */
+.home-container {
+    background: rgb(205,208,224);
+    background: linear-gradient(304deg, rgba(205,208,224,1) 0%, rgba(187,185,228,1) 29%, rgba(217,167,228,1) 72%, rgba(229,188,255,1) 100%);
+}
 </style>

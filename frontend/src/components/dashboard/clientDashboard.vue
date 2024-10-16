@@ -7,16 +7,16 @@
       </header>
   
       <!-- Liste des conversations -->
-      <div v-if="conversations.length > 0" class="conversation-list bg-white p-6 rounded-lg shadow-md">
+      <div v-if="conversations.length > 0" class="conversation-list backdrop-blur-xl  bg-gray-200 bg-opacity-50 p-6 rounded-lg shadow-md">
         <h2 class="text-2xl font-bold text-gray-700 mb-4">Dernières conversations</h2>
   
-        <table class="min-w-full bg-white">
+        <table class="min-w-full ">
           <thead>
             <tr>
-              <th class="py-2 px-4 bg-gray-200">Professeur</th>
-              <th class="py-2 px-4 bg-gray-200">Dernier message</th>
-              <th class="py-2 px-4 bg-gray-200">Date</th>
-              <th class="py-2 px-4 bg-gray-200">Action</th>
+              <th class="py-2 px-4">Professeur</th>
+              <th class="py-2 px-4">Dernier message</th>
+              <th class="py-2 px-4">Date</th>
+              <th class="py-2 px-4">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -93,7 +93,8 @@
   
   <style scoped>
   .client-dashboard {
-    background-color: #f7fafc;
+    background: rgb(205,208,224);
+    background: linear-gradient(304deg, rgba(205,208,224,1) 0%, rgba(187,185,228,1) 29%, rgba(217,167,228,1) 72%, rgba(229,188,255,1) 100%);
   }
   
   table {
@@ -106,10 +107,7 @@
     text-align: left;
     border: 1px solid #ddd;
   }
-  
-  th {
-    background-color: #f3f4f6;
-  }
+
   
   button {
     transition: color 0.2s ease-in-out;
