@@ -12,9 +12,15 @@
 
 @layer utilities {
 
+
+  .gradient {
+    background: rgb(205,208,224);
+    background: linear-gradient(304deg, rgba(205,208,224,1) 0%, rgba(187,185,228,1) 29%, rgba(217,167,228,1) 72%, rgba(229,188,255,1) 100%);
+  }
+
 }
 
-.form-group {
+.form-group { 
   @apply mb-1 text-left;
 }
 
@@ -22,3 +28,4 @@
 input {
   @apply w-full p-2 rounded-lg border-b border-gray-500
 }
+

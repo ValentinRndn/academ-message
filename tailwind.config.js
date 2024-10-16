@@ -9,6 +9,8 @@ module.exports = {
       colors: {
         'bluee': '#db8ced',
         'purplee': 'rgba(217,167,228,1)',
+        'darkgray': '#222222',
+        'lightgray': '#393939',
 
       },
       fontFamily: {

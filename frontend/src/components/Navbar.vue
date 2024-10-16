@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar border-b border-gray-200 backdrop-blur-xl bg-gray-200 bg-opacity-50">
+  <nav class="navbar border-b border-gray-200  bg-darkgray ">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
@@ -9,9 +9,9 @@
 
         <!-- Navigation Links pour petits écrans -->
         <div class="flex md:hidden space-x-8">
-          <router-link to="/" class="text-gray-600 hover:text-gray-900">Accueil</router-link>
-          <router-link to="conversations" class="text-gray-600 hover:text-gray-900">Conversations</router-link>
-          <router-link to="professors" class="text-gray-600 hover:text-gray-900">Professeurs</router-link>
+          <router-link to="/" class="text-white hover:text-gray-">Accueil</router-link>
+          <router-link to="conversations" class="text-white hover:text-gray-">Conversations</router-link>
+          <router-link to="professors" class="text-white hover:text-gray-">Professeurs</router-link>
         </div>
 
         <!-- Boutons d'authentification ou photo de profil -->
