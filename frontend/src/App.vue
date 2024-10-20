@@ -1,5 +1,5 @@
 <template>
-  <div class="app font-quicksand ">
+  <div class="app font-quicksand gradient h-screen overflow-y-hidden">
 
 
     <router-view />

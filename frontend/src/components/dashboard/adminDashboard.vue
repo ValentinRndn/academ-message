@@ -7,7 +7,7 @@
       </header>
   
       <!-- Statistiques générales -->
-      <div class="stats grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      <div class="stats grid grid-cols-3 sm:grid-cols-1  gap-6 mb-12">
         <div class="stat-card bg-white p-6 rounded-lg shadow-md">
           <h2 class="text-xl font-semibold text-gray-700">Nombre de Professeurs</h2>
           <p class="stat-value text-4xl font-bold text-blue-500">25</p>
@@ -61,7 +61,7 @@
           </div>
           <button
             type="submit"
-            class="bg-blue-500 text-white p-2 w-full rounded-md hover:bg-blue-600 transition duration-200"
+            class="bg-blue-500 text-black border border-gray-300 p-2 w-full rounded-md hover:bg-blue-600 transition duration-200"
           >
             Créer le professeur
           </button>

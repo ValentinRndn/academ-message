@@ -7,14 +7,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'blue': '#1E8EFE',
+        'bluee': '#db8ced',
+        'purplee': 'rgba(217,167,228,1)',
+        'darkgray': '#222222',
+        'lightgray': '#393939',
+        'backgray': '#171717',
+        'purewhite': '#424242',
 
-
-        'blue1' : 'ADE1FB',
-        'blue2' : '#266CA9',
-        'blue3' : '#0F2573',
-        'blue4' : '#041D56',
-        'blue5' : '#01082D',
       },
       fontFamily: {
         'quicksand' : ['quicksand', 'sans-serif'],
