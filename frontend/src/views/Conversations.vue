@@ -97,8 +97,8 @@
     </div>
 
     <div v-if="isBookingModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div class="bg-white text-black p-6 rounded-lg w-96">
-        <h2 class="text-xl font-bold mb-4">Réserver une session</h2>
+  <div class="bg-white text-black p-6 rounded-lg w-96">
+    <h2 class="text-xl font-bold mb-4">Réserver une session</h2>
         <label class="block mb-2">Date:</label>
         <input type="date" v-model="bookingDate" class="w-full p-2 mb-4 border rounded-md" />
         
@@ -109,25 +109,21 @@
           </option>
         </select>
 
-        <label class="block mb-2">Numéro de carte:</label>
-        <input type="text" v-model="cardNumber" placeholder="5555 5555 5555 4444" class="w-full p-2 mb-4 border rounded-md" />
-        
-        <label class="block mb-2">Date d'expiration:</label>
-        <input type="text" v-model="expiryDate" placeholder="MM/YY" class="w-full p-2 mb-4 border rounded-md" />
-        
-        <label class="block mb-2">CVV:</label>
-        <input type="text" v-model="cvv" placeholder="123" class="w-full p-2 mb-4 border rounded-md" />
-
-        <div class="flex justify-end space-x-4">
-          <button @click="closeBookingModal" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Annuler</button>
-          <button @click="bookSession" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Confirmer</button>
-        </div>
-      </div>
+    <!-- Stripe Elements pour la saisie des informations bancaires -->
+    <label class="block mb-2">Coordonnées bancaires:</label>
+    <div id="card-element" class="w-full p-2 mb-4 border rounded-md bg-lightgray"></div>
+    
+    <div class="flex justify-end space-x-4">
+      <button @click="closeBookingModal" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Annuler</button>
+      <button @click="confirmBooking" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Confirmer</button>
     </div>
+  </div>
+</div>
   </div>
 </template>
 
 <script setup>
+import { loadStripe } from '@stripe/stripe-js';
 import { ref, computed, onMounted } from 'vue';
 import { io } from 'socket.io-client';
 import axios from 'axios';
@@ -147,7 +143,9 @@ const selectedConversation = computed(() =>
   conversations.value.find(convo => convo._id === selectedConversationId.value)
 );
 
-const newMessage = ref('');
+const stripePromise = loadStripe('sk_test_51LmhGsHQanXHoJn0RTN8E60pZA6VlweUCRsEKA5o0Xwnucm1UKCNRJGwUYgXXcPajVgfjRp3GgUIme0HbeSGZkR300dtVCPlyy');
+let elements;
+
 const isBookingModalOpen = ref(false);
 const bookingDate = ref('');
 const bookingTime = ref('');
@@ -216,11 +214,47 @@ const sendMessage = async () => {
   }
 };
 
-const openBookingModal = () => isBookingModalOpen.value = true;
-const closeBookingModal = () => isBookingModalOpen.value = false;
+const openBookingModal = async () => {
+  isBookingModalOpen.value = true;
+  const stripe = await stripePromise;
 
-onMounted(() => {
-  loadConversations();
+  // Configurez Stripe Elements
+  elements = stripe.elements();
+  const cardElement = elements.create('card');
+  cardElement.mount('#card-element');
+};
+
+const confirmBooking = async () => {
+  const stripe = await stripePromise;
+  const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+    payment_method: {
+      card: elements.getElement('card'),
+      billing_details: { name: 'Votre Nom' },
+    },
+  });
+
+  if (error) {
+    console.error(error);
+  } else {
+    alert('Paiement réussi !');
+    isBookingModalOpen.value = false;
+    // Ajoutez une redirection ou une mise à jour de l'interface
+  }
+};
+
+onMounted(async () => {
+  await loadConversations();
+  // Récupérez le client secret pour la Payment Intent
+  const response = await axios.post('/api/payment/create-payment-intent', {
+    amount: totalAmount,
+    currency: 'eur',
+    metadata: {
+      userId: 'user_id',
+      bookingDate: bookingDate.value,
+      bookingTime: bookingTime.value,
+    },
+  });
+  clientSecret = response.data.clientSecret;
 });
 </script>
 
