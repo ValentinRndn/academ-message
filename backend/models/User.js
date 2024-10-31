@@ -23,6 +23,10 @@ const UserSchema = new mongoose.Schema({
     enum: ['admin', 'client', 'professor'],
     default: 'client',
   },
+  stripeAccountId: {
+    type: String,
+    default: '',
+  },
 });
 
 module.exports = mongoose.model('User', UserSchema);

@@ -1,6 +1,27 @@
 <template>
   <Navbar></Navbar>
   <div class="messenger-layout h-full flex  text-white m-4 gap-4 md:flex-col ">
+
+        <!-- Modal de confirmation de réservation -->
+        <div v-if="isConfirmationModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div class="bg-white text-black p-6 rounded-lg w-96">
+        <h2 class="text-xl font-bold mb-4">Récapitulatif de votre réservation</h2>
+        
+        <!-- Détails de la réservation -->
+        <p><strong>Date : </strong>{{ bookingDate }}</p>
+        <p><strong>Heure : </strong>{{ bookingTime }}</p>
+        <p><strong>Prix Total : </strong>{{ bookingAmount }} €</p>
+
+        <div class="flex justify-end space-x-4 mt-4">
+          <button @click="closeConfirmationModal" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+
     <!-- Liste des conversations (gauche) -->
     <div class="conversations-list w-1/4 bg-darkgray p-4 rounded-lg h-[89.5vh]">
       <div class="top-conversations-list-container flex items-begin justify-between h-fit">
@@ -95,30 +116,33 @@
         <p>Sélectionnez une conversation pour commencer à discuter.</p>
       </div>
     </div>
-
+    <!-- Modale de réservation avec Stripe -->
     <div v-if="isBookingModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-  <div class="bg-white text-black p-6 rounded-lg w-96">
-    <h2 class="text-xl font-bold mb-4">Réserver une session</h2>
+      <div class="bg-white text-black p-6 rounded-lg w-96">
+        <h2 class="text-xl font-bold mb-4">Réserver une session</h2>
         <label class="block mb-2">Date:</label>
         <input type="date" v-model="bookingDate" class="w-full p-2 mb-4 border rounded-md" />
         
         <label class="block mb-2">Heure:</label>
         <select v-model="bookingTime" class="w-full p-2 mb-4 border rounded-md">
-          <option v-for="time in availableTimes" :key="time" :value="time">
-            {{ time }}
-          </option>
+          <option v-for="time in availableTimes" :key="time" :value="time">{{ time }}</option>
         </select>
 
-    <!-- Stripe Elements pour la saisie des informations bancaires -->
-    <label class="block mb-2">Coordonnées bancaires:</label>
-    <div id="card-element" class="w-full p-2 mb-4 border rounded-md bg-lightgray"></div>
-    
-    <div class="flex justify-end space-x-4">
-      <button @click="closeBookingModal" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Annuler</button>
-      <button @click="confirmBooking" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Confirmer</button>
+        <!-- Input pour le montant -->
+        <label class="block mb-2">Montant (€):</label>
+        <input type="number" v-model="totalAmount" class="w-full p-2 mb-4 border rounded-md" min="1" placeholder="Entrer le montant" />
+
+
+        <!-- Stripe Elements pour la saisie des informations bancaires -->
+        <label class="block mb-2">Coordonnées bancaires:</label>
+        <div id="card-element" class="w-full p-2 mb-4 border rounded-md bg-lightgray"></div>
+        
+        <div class="flex justify-end space-x-4">
+          <button @click="closeBookingModal" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Annuler</button>
+          <button @click="confirmBooking" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Confirmer</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   </div>
 </template>
 
@@ -131,36 +155,25 @@ import Navbar from '../components/Navbar.vue';
 import { decodeJwt } from '../services/decodeJwt'; 
 
 const socket = io('http://localhost:5000');
-let userId = null;
-const userRole = ref('');
-
-const conversations = ref([]);
-const selectedConversationId = ref(null);
-const sortedConversations = computed(() =>
-  conversations.value.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-);
-const selectedConversation = computed(() =>
-  conversations.value.find(convo => convo._id === selectedConversationId.value)
-);
-
-const stripePromise = loadStripe('sk_test_51LmhGsHQanXHoJn0RTN8E60pZA6VlweUCRsEKA5o0Xwnucm1UKCNRJGwUYgXXcPajVgfjRp3GgUIme0HbeSGZkR300dtVCPlyy');
+const stripePromise = loadStripe('pk_test_51LmhGsHQanXHoJn0wBK5v2yQyHFdQ4KlSXSXZobDhxFPCrhVwWtCwWXvNIxjOQdi65riR24NEgQyY6Ck1UZkPqq800jtbOgNU8');
+let clientSecret = null;
 let elements;
 
+const userRole = ref('');
+const conversations = ref([]);
+const newMessage = ref(''); // Ajoutez cette ligne pour définir newMessage
+const selectedConversationId = ref(null);
 const isBookingModalOpen = ref(false);
 const bookingDate = ref('');
 const bookingTime = ref('');
-const cardNumber = ref('');
-const expiryDate = ref('');
-const cvv = ref('');
+const totalAmount = 5000; // Example amount in cents
+let userId = null;
+const availableTimes = ref([...Array(24).keys()].flatMap(h => [`${String(h).padStart(2, '0')}:00`, `${String(h).padStart(2, '0')}:30`]));
 
-const availableTimes = ref([
-  '00:00', '00:30', '01:00', '01:30', '02:00', '02:30', '03:00', '03:30',
-  '04:00', '04:30', '05:00', '05:30', '06:00', '06:30', '07:00', '07:30',
-  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
-  '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
-  '20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00', '23:30'
-]);
+const sortedConversations = computed(() => conversations.value.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)));
+const selectedConversation = computed(() => conversations.value.find(convo => convo._id === selectedConversationId.value));
+const isConfirmationModalOpen = ref(false);
+const selectedProfessor = ref(null); 
 
 const loadConversations = async () => {
   const token = localStorage.getItem('token');
@@ -184,10 +197,16 @@ const loadConversations = async () => {
 };
 
 const selectConversation = (conversationId) => {
-  selectedConversationId.value = conversationId;
-  socket.emit('join-conversation', conversationId);
-};
+    selectedConversationId.value = conversationId;
+    const conversation = conversations.value.find((convo) => convo._id === conversationId);
 
+    if (conversation) {
+        // Définir le professeur sélectionné en fonction de la conversation
+        selectedProfessor.value = getOtherParticipant(conversation.participants);
+    }
+
+    socket.emit('join-conversation', conversationId);
+};
 const getOtherParticipant = (participants) => {
   return participants.find(participant => participant._id !== userId);
 };
@@ -214,48 +233,73 @@ const sendMessage = async () => {
   }
 };
 
+// Fonction pour ouvrir la modal et créer le Payment Intent
 const openBookingModal = async () => {
-  isBookingModalOpen.value = true;
-  const stripe = await stripePromise;
+    if (!selectedProfessor.value) {
+        console.error('Aucun professeur sélectionné');
+        return;
+    }
 
-  // Configurez Stripe Elements
-  elements = stripe.elements();
-  const cardElement = elements.create('card');
-  cardElement.mount('#card-element');
+    isBookingModalOpen.value = true;
+    const stripe = await stripePromise;
+
+    elements = stripe.elements();
+    const cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+
+    try {
+        const response = await axios.post('http://localhost:5000/api/payment/create-payment-intent', {
+            amount: totalAmount, // Assurez-vous que totalAmount est bien défini avant
+            currency: 'eur',
+            professorStripeAccountId: selectedProfessor.value.stripeAccountId,
+        });
+        clientSecret = response.data.clientSecret;
+    } catch (error) {
+        console.error('Erreur lors de la création de Payment Intent:', error);
+        isBookingModalOpen.value = false;
+    }
 };
 
+
+// Fonction pour confirmer la réservation et le paiement
 const confirmBooking = async () => {
-  const stripe = await stripePromise;
-  const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-    payment_method: {
-      card: elements.getElement('card'),
-      billing_details: { name: 'Votre Nom' },
-    },
-  });
+    const stripe = await stripePromise;
 
-  if (error) {
-    console.error(error);
-  } else {
-    alert('Paiement réussi !');
-    isBookingModalOpen.value = false;
-    // Ajoutez une redirection ou une mise à jour de l'interface
-  }
+    if (!clientSecret) {
+        console.error("Le clientSecret n'est pas défini. Assurez-vous que la création du Payment Intent s'est bien déroulée.");
+        return;
+    }
+
+    try {
+        // Confirmez le paiement côté Stripe
+        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: elements.getElement('card'),
+                billing_details: { name: 'Nom du client' },
+            },
+        });
+
+        if (error) {
+            console.error('Erreur lors de la confirmation du paiement:', error);
+        } else {
+            isBookingModalOpen.value = false;
+            isConfirmationModalOpen.value = true;
+        }
+    } catch (error) {
+        console.error('Erreur lors de la réservation:', error);
+    }
 };
 
-onMounted(async () => {
-  await loadConversations();
-  // Récupérez le client secret pour la Payment Intent
-  const response = await axios.post('/api/payment/create-payment-intent', {
-    amount: totalAmount,
-    currency: 'eur',
-    metadata: {
-      userId: 'user_id',
-      bookingDate: bookingDate.value,
-      bookingTime: bookingTime.value,
-    },
-  });
-  clientSecret = response.data.clientSecret;
-});
+const closeBookingModal = () => {
+    isBookingModalOpen.value = false;
+};
+
+const closeConfirmationModal = () => {
+    isConfirmationModalOpen.value = false;
+};
+
+
+onMounted(loadConversations);
 </script>
 
 <style scoped>

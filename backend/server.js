@@ -4,10 +4,10 @@ const cors = require('cors'); // Import du middleware cors
 const { Server } = require('socket.io');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db'); // Connexion à MongoDB
+require('dotenv').config();
 
 // Import des modèles
 const Conversation = require('./models/Conversation');
-const User = require('./models/User');
 
 dotenv.config();
 connectDB(); // Connexion à MongoDB
@@ -35,7 +35,7 @@ app.use('/api/auth', require('./routes/authRoute'));
 app.use('/api/users', require('./routes/userRoute')); // Route des utilisateurs
 app.use('/api/conversations', require('./routes/conversationRoute')); // Route des conversations
 app.use('/uploads', express.static('uploads'));
-
+app.use('/api/payment', require('./routes/payment')); 
 // Socket.IO pour gérer les messages en temps réel
 io.on('connection', (socket) => {
 

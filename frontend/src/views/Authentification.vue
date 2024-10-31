@@ -61,7 +61,7 @@
   
           localStorage.setItem('token', response.data.token);
               // Stocker le rôle de l'utilisateur
-          this.$router.push({ name: 'home' });
+          this.$router.push({ name: 'conversations' });
         } catch (err) {
           this.error = 'Mot de passe ou Email incorrecte. Veuillez réessayer.';
         }
