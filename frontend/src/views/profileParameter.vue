@@ -24,6 +24,17 @@
             class="mt-1 p-2 w-full border border-gray-300 rounded-md"
           />
         </div>
+
+                <!-- Champ pour l'id stripe -->
+                <div class="form-group mb-4">
+          <label for="idStripe" class="block text-sm font-medium text-gray-700">ID du compte Stripe</label>
+          <input
+            type="text"
+            id="idStripe"
+            v-model="formData.idstripe"
+            class="mt-1 p-2 w-full border border-gray-300 rounded-md"
+          />
+        </div>
   
         <!-- Champ pour le mot de passe (optionnel) -->
         <div class="form-group mb-4">
@@ -71,6 +82,7 @@
   const formData = ref({
     name: '',
     email: '',
+    idstripe: '',
     password: '',
   });
   
@@ -98,6 +110,7 @@
         headers: { Authorization: `Bearer ${token}` },
       });
       formData.value.name = response.data.name;
+      FormData.value.idstripe = response.data.idstripe;
       formData.value.email = response.data.email;
       profilePictureUrl.value = response.data.profilePicture
         ? `http://localhost:5000/uploads/${response.data.profilePicture}`
@@ -112,6 +125,7 @@
     const formDataToSend = new FormData();
     formDataToSend.append('name', formData.value.name);
     formDataToSend.append('email', formData.value.email);
+    formDataToSend.append('idstripe', formData.value.idstripe);
     if (formData.value.password) {
       formDataToSend.append('password', formData.value.password);
     }
