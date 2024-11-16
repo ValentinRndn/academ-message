@@ -2,25 +2,6 @@
   <Navbar></Navbar>
   <div class="messenger-layout h-full flex  text-white m-4 gap-4 md:flex-col ">
 
-        <!-- Modal de confirmation de réservation -->
-        <div v-if="isConfirmationModalOpen" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div class="bg-white text-black p-6 rounded-lg w-96">
-        <h2 class="text-xl font-bold mb-4">Récapitulatif de votre réservation</h2>
-        
-        <!-- Détails de la réservation -->
-        <p><strong>Date : </strong>{{ bookingDate }}</p>
-        <p><strong>Heure : </strong>{{ bookingTime }}</p>
-        <p><strong>Prix Total : </strong>{{ bookingAmount }} €</p>
-
-        <div class="flex justify-end space-x-4 mt-4">
-          <button @click="closeConfirmationModal" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
-            Fermer
-          </button>
-        </div>
-      </div>
-    </div>
-
-
 
     <!-- Liste des conversations (gauche) -->
     <div class="conversations-list w-1/4 bg-darkgray p-4 rounded-lg h-[89.5vh]">
@@ -167,6 +148,7 @@ const isBookingModalOpen = ref(false);
 const bookingDate = ref('');
 const bookingTime = ref('');
 const totalAmount = 5000; // Example amount in cents
+const professorStripeAccountId = 'acct_1QKhSjELvCyE3pew';
 let userId = null;
 const availableTimes = ref([...Array(24).keys()].flatMap(h => [`${String(h).padStart(2, '0')}:00`, `${String(h).padStart(2, '0')}:30`]));
 
@@ -233,69 +215,71 @@ const sendMessage = async () => {
   }
 };
 
-// Fonction pour ouvrir la modal et créer le Payment Intent
 const openBookingModal = async () => {
-    if (!selectedProfessor.value) {
-        console.error('Aucun professeur sélectionné');
-        return;
-    }
+  try {
+    const stripe = await stripePromise;
 
+    // Afficher la modale
     isBookingModalOpen.value = true;
-    const stripe = await stripePromise;
 
-    elements = stripe.elements();
-    const cardElement = elements.create('card');
-    cardElement.mount('#card-element');
+    // Attendre que la modale soit rendue avant de monter les éléments
+    setTimeout(() => {
+      if (!elements) {
+        elements = stripe.elements();
+      }
 
-    try {
-        const response = await axios.post('http://localhost:5000/api/payment/create-payment-intent', {
-            amount: totalAmount, // Assurez-vous que totalAmount est bien défini avant
-            currency: 'eur',
-            professorStripeAccountId: selectedProfessor.value.stripeAccountId,
-        });
-        clientSecret = response.data.clientSecret;
-    } catch (error) {
-        console.error('Erreur lors de la création de Payment Intent:', error);
-        isBookingModalOpen.value = false;
-    }
+      // Vérifiez si le champ est déjà monté pour éviter les doublons
+      if (!document.getElementById('card-element').children.length) {
+        const cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+      }
+    }, 100); // Délai pour s'assurer que le DOM est mis à jour
+  } catch (error) {
+    console.error('Erreur lors de l\'ouverture de la modale de paiement :', error);
+  }
 };
 
 
-// Fonction pour confirmer la réservation et le paiement
 const confirmBooking = async () => {
+  try {
     const stripe = await stripePromise;
 
+    // Vérifiez que `clientSecret` est défini
     if (!clientSecret) {
-        console.error("Le clientSecret n'est pas défini. Assurez-vous que la création du Payment Intent s'est bien déroulée.");
-        return;
+      const response = await axios.post('http://localhost:5000/api/booking//schedule-payment', {
+        amount: totalAmount.value * 100, // Montant en centimes
+        currency: 'eur',
+        professorStripeAccountId,
+        platformFee: 500, // 5 euros pour la plateforme
+      });
+      clientSecret = response.data.clientSecret;
     }
 
-    try {
-        // Confirmez le paiement côté Stripe
-        const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-            payment_method: {
-                card: elements.getElement('card'),
-                billing_details: { name: 'Nom du client' },
-            },
-        });
+    // Confirmer le paiement
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: elements.getElement('card'),
+        billing_details: { name: 'Nom du client' },
+      },
+    });
 
-        if (error) {
-            console.error('Erreur lors de la confirmation du paiement:', error);
-        } else {
-            isBookingModalOpen.value = false;
-            isConfirmationModalOpen.value = true;
-        }
-    } catch (error) {
-        console.error('Erreur lors de la réservation:', error);
+    if (error) {
+      console.error('Erreur lors de la confirmation du paiement :', error);
+      alert('Paiement échoué. Veuillez vérifier vos informations.');
+    } else {
+      console.log('Paiement réussi :', paymentIntent);
+      alert('Paiement confirmé avec succès !');
+      isBookingModalOpen.value = false;
     }
+  } catch (error) {
+    console.error('Erreur lors de la réservation :', error);
+    alert('Une erreur est survenue. Veuillez réessayer.');
+  }
 };
+
 
 const closeBookingModal = () => {
     isBookingModalOpen.value = false;
-};
-
-const closeConfirmationModal = () => {
-    isConfirmationModalOpen.value = false;
 };
 
 

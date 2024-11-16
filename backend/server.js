@@ -1,41 +1,42 @@
 const express = require('express');
 const http = require('http');
-const cors = require('cors'); // Import du middleware cors
+const cors = require('cors'); 
 const { Server } = require('socket.io');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db'); // Connexion à MongoDB
+const connectDB = require('./config/db'); 
 require('dotenv').config();
 
 // Import des modèles
 const Conversation = require('./models/Conversation');
 
 dotenv.config();
-connectDB(); // Connexion à MongoDB
+connectDB(); 
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*', // L'origine de ton frontend Vue.js
-    methods: ['GET', 'POST'] // Méthodes HTTP autorisées
+    origin: '*', 
+    methods: ['GET', 'POST'] 
   }
 });
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173', // L'origine de ton frontend Vue.js
-  methods: 'GET,POST,PUT,DELETE', // Méthodes HTTP autorisées
-  credentials: true // Si tu veux envoyer des cookies (optionnel)
+  origin: 'http://localhost:5173', 
+  methods: 'GET,POST,PUT,DELETE',
+  credentials: true
 }));
 
-app.use(express.json()); // Middleware pour traiter les JSON
+app.use(express.json()); 
 
 // Routes
 app.use('/api/auth', require('./routes/authRoute'));
-app.use('/api/users', require('./routes/userRoute')); // Route des utilisateurs
-app.use('/api/conversations', require('./routes/conversationRoute')); // Route des conversations
+app.use('/api/users', require('./routes/userRoute')); 
+app.use('/api/conversations', require('./routes/conversationRoute')); 
 app.use('/uploads', express.static('uploads'));
-app.use('/api/payment', require('./routes/payment')); 
+app.use('/api/booking', require('./routes/bookingRoutes')); 
+
 // Socket.IO pour gérer les messages en temps réel
 io.on('connection', (socket) => {
 
