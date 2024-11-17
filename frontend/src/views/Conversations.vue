@@ -25,7 +25,7 @@
       >
         <div class="flex items-center gap-3">
           <img
-            :src="getOtherParticipant(conversation.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(conversation.participants).profilePicture}` : '/path/to/default-profile-pic.jpg'"
+            :src="getOtherParticipant(conversation.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(conversation.participants).profilePicture}` : '../../assets/profil/default.webp'"
             alt="Profile"
             class="w-8 h-8 rounded-full"
           />
@@ -41,7 +41,7 @@
     <div class="conversation-detail w-3/4 p-4 flex flex-col bg-darkgray rounded-lg h-[89.5vh]">
       <div v-if="selectedConversation" class="flex items-center gap-3 mb-4">
         <img
-          :src="getOtherParticipant(selectedConversation.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(selectedConversation.participants).profilePicture}` : '/path/to/default-profile-pic.jpg'"
+          :src="getOtherParticipant(selectedConversation.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(selectedConversation.participants).profilePicture}` : 'http://localhost:5000/public/images/default-profile.webp'"
           alt="Profile"
           class="w-10 h-10 rounded-full"
         />
@@ -49,12 +49,13 @@
           {{ getOtherParticipant(selectedConversation.participants).name }}
         </h2>
         <button
-          v-if="userRole !== 'professor'"
+          v-if="selectedConversation && selectedConversation.messages.length >= 15 && userRole !== 'professor'"
           @click="openBookingModal"
           class="gradient text-white ml-4 px-2 py-1 rounded"
         >
           Réserver
         </button>
+
       </div>
 
       <div v-if="selectedConversation" class="flex flex-col h-[89.5vh] ">
@@ -65,12 +66,15 @@
             :class="{'message-left': message.sender._id !== userId, 'message-right': message.sender._id === userId}"
             class="message-item mb-2 flex items-start"
           >
-            <img
-              v-if="message.sender._id !== userId"
-              :src="message.sender.profilePicture ? `http://localhost:5000/uploads/${message.sender.profilePicture}` : '/path/to/default-profile-pic.jpg'"
-              alt="Profile"
-              class="w-8 h-8 rounded-full mr-2"
-            />
+          <img
+          v-if="message.sender._id !== userId"
+          :src="message.sender.profilePicture 
+            ? `http://localhost:5000/uploads/${message.sender.profilePicture}` 
+            : 'http://localhost:5000/public/images/default-profile.webp'"
+          alt="Profile"
+          class="w-8 h-8 rounded-full mr-2"
+        />
+
             <p
               :class="{'bg-lightgray text-white p-2 rounded-md': message.sender._id !== userId, 'gradient text-white p-2 rounded-lg ml-auto': message.sender._id === userId}"
               class="message-text"
@@ -81,12 +85,19 @@
         </div>
 
         <div class="message-input flex items-center sticky bottom-2">
+          <div v-if="isTyping" class="text-gray-400 text-sm">
+            L'autre utilisateur est en train d'écrire...
+          </div>
+
           <input
             v-model="newMessage"
             type="text"
             placeholder="Aa"
             class="w-full p-1 bg-lightgray"
+            @input="notifyTyping"
+            @blur="stopTyping"
           />
+
           <svg xmlns="http://www.w3.org/2000/svg" @click="sendMessage" class="ml-4 cursor-pointer hover:text-purplee" width="35" height="35" viewBox="0 0 24 24">
             <path fill="currentColor" d="M21.243 12.437a.5.5 0 0 0 0-.874l-2.282-1.268A75.5 75.5 0 0 0 4.813 4.231l-.665-.208A.5.5 0 0 0 3.5 4.5v5.75a.5.5 0 0 0 .474.5l1.01.053a44.4 44.4 0 0 1 7.314.998l.238.053c.053.011.076.033.089.05a.16.16 0 0 1 .029.096c0 .04-.013.074-.029.096c-.013.017-.036.039-.089.05l-.238.053a44.5 44.5 0 0 1-7.315.999l-1.01.053a.5.5 0 0 0-.473.499v5.75a.5.5 0 0 0 .65.477l.664-.208a75.5 75.5 0 0 0 14.147-6.064z"/>
           </svg>
@@ -148,15 +159,15 @@ const socket = io('http://localhost:5000');
 const stripePromise = loadStripe('pk_test_51LmhGsHQanXHoJn0wBK5v2yQyHFdQ4KlSXSXZobDhxFPCrhVwWtCwWXvNIxjOQdi65riR24NEgQyY6Ck1UZkPqq800jtbOgNU8');
 let clientSecret = null;
 let elements;
-
+const isTyping = ref(false);
 const userRole = ref('');
 const conversations = ref([]);
-const newMessage = ref(''); // Ajoutez cette ligne pour définir newMessage
+const newMessage = ref(''); 
 const selectedConversationId = ref(null);
 const isBookingModalOpen = ref(false);
 const bookingDate = ref('');
 const bookingTime = ref('');
-const totalAmount = ref(0); // Initialisez avec une valeur par défaut
+const totalAmount = ref(0); 
 
 const professorStripeAccountId = ref('');
 
@@ -276,13 +287,9 @@ const confirmBooking = async () => {
       professorStripeAccountId: professorStripeAccountId.value, // Utilisez `.value`
     };
 
-    console.log('Payload envoyé au backend :', payload);
 
     const response = await axios.post('http://localhost:5000/api/booking/schedule-payment', payload);
 
-    console.log('Réponse du backend :', response.data);
-
-    // Succès
     alert(response.data.message);
   } catch (error) {
     console.error('Erreur lors de la réservation :', error.response?.data || error.message);
@@ -290,17 +297,45 @@ const confirmBooking = async () => {
   }
 };
 
-
-
-
-
-
 const closeBookingModal = () => {
     isBookingModalOpen.value = false;
 };
 
 
+const notifyTyping = () => {
+  if (selectedConversationId.value) {
+    socket.emit('typing', {
+      conversationId: selectedConversationId.value,
+      userId,
+    });
+  }
+};
+
+const stopTyping = () => {
+  if (selectedConversationId.value) {
+    socket.emit('stop-typing', {
+      conversationId: selectedConversationId.value,
+      userId,
+    });
+  }
+};
+
+
+
 onMounted(loadConversations);
+onMounted(() => {
+  socket.on('user-typing', (typingUserId) => {
+    if (typingUserId !== userId) {
+      isTyping.value = true;
+    }
+  });
+
+  socket.on('user-stopped-typing', (typingUserId) => {
+    if (typingUserId !== userId) {
+      isTyping.value = false;
+    }
+  });
+});
 </script>
 
 <style scoped>

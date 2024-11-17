@@ -37,17 +37,19 @@ app.use('/api/conversations', require('./routes/conversationRoute'));
 app.use('/uploads', express.static('uploads'));
 app.use('/api/booking', require('./routes/bookingRoutes')); 
 app.use('/public', express.static('public'));
-// Socket.IO pour gérer les messages en temps réel
+
+
 io.on('connection', (socket) => {
+  console.log('Un utilisateur s\'est connecté:', socket.id);
 
   // Rejoindre une conversation
   socket.on('join-conversation', (conversationId) => {
     socket.join(conversationId);
+    console.log(`Utilisateur a rejoint la conversation : ${conversationId}`);
   });
 
   // Recevoir un nouveau message
   socket.on('new-message', async ({ conversationId, message }) => {
-
     try {
       // Rechercher la conversation par ID
       const conversation = await Conversation.findById(conversationId);
@@ -55,7 +57,7 @@ io.on('connection', (socket) => {
       if (conversation) {
         // Ajouter le message à la conversation
         conversation.messages.push({
-          sender: message.sender, // ID de l'utilisateur envoyant le message
+          sender: message.sender, 
           text: message.text,
           createdAt: new Date(),
         });
@@ -70,11 +72,22 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Événement : L'utilisateur est en train d'écrire
+  socket.on('typing', ({ conversationId, userId }) => {
+    socket.to(conversationId).emit('user-typing', userId); // Émettre à tous sauf à l'expéditeur
+  });
+
+  // Événement : L'utilisateur a arrêté d'écrire
+  socket.on('stop-typing', ({ conversationId, userId }) => {
+    socket.to(conversationId).emit('user-stopped-typing', userId);
+  });
+
   // Déconnexion
   socket.on('disconnect', () => {
     console.log('Un utilisateur s\'est déconnecté:', socket.id);
   });
 });
+
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
