@@ -111,7 +111,16 @@
 
         <!-- Input pour le montant -->
         <label class="block mb-2">Montant (€):</label>
-        <input type="number" v-model="totalAmount" class="w-full p-2 mb-4 border rounded-md" min="1" placeholder="Entrer le montant" />
+        <input 
+  type="number" 
+  v-model.number="totalAmount" 
+  class="w-full p-2 mb-4 border rounded-md" 
+  min="1" 
+  placeholder="Entrer le montant"
+/>
+
+
+
 
 
         <!-- Stripe Elements pour la saisie des informations bancaires -->
@@ -147,7 +156,8 @@ const selectedConversationId = ref(null);
 const isBookingModalOpen = ref(false);
 const bookingDate = ref('');
 const bookingTime = ref('');
-const totalAmount = 5000; // Example amount in cents
+const totalAmount = ref(0); // Initialisez avec une valeur par défaut
+
 const professorStripeAccountId = 'acct_1QKhSjELvCyE3pew';
 let userId = null;
 const availableTimes = ref([...Array(24).keys()].flatMap(h => [`${String(h).padStart(2, '0')}:00`, `${String(h).padStart(2, '0')}:30`]));
@@ -242,40 +252,37 @@ const openBookingModal = async () => {
 
 const confirmBooking = async () => {
   try {
-    const stripe = await stripePromise;
+    // Valider la valeur de totalAmount
+    console.log('Valeur actuelle de totalAmount :', totalAmount.value);
+if (!totalAmount.value || isNaN(totalAmount.value) || totalAmount.value <= 0) {
+  alert('Veuillez entrer un montant valide.');
+  return;
+}
 
-    // Vérifiez que `clientSecret` est défini
-    if (!clientSecret) {
-      const response = await axios.post('http://localhost:5000/api/booking//schedule-payment', {
-        amount: totalAmount.value * 100, // Montant en centimes
-        currency: 'eur',
-        professorStripeAccountId,
-        platformFee: 500, // 5 euros pour la plateforme
-      });
-      clientSecret = response.data.clientSecret;
-    }
 
-    // Confirmer le paiement
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement('card'),
-        billing_details: { name: 'Nom du client' },
-      },
-    });
+    const payload = {
+      bookingDate: bookingDate.value,
+      bookingTime: bookingTime.value,
+      amount: Math.round(totalAmount.value * 100), // Convertir en centimes
+      currency: 'eur',
+      professorStripeAccountId,
+    };
 
-    if (error) {
-      console.error('Erreur lors de la confirmation du paiement :', error);
-      alert('Paiement échoué. Veuillez vérifier vos informations.');
-    } else {
-      console.log('Paiement réussi :', paymentIntent);
-      alert('Paiement confirmé avec succès !');
-      isBookingModalOpen.value = false;
-    }
+    console.log('Payload envoyé au backend :', payload);
+
+    const response = await axios.post('http://localhost:5000/api/booking/schedule-payment', payload);
+
+    console.log('Réponse du backend :', response.data);
+
+    // Succès
+    alert(response.data.message);
   } catch (error) {
-    console.error('Erreur lors de la réservation :', error);
-    alert('Une erreur est survenue. Veuillez réessayer.');
+    console.error('Erreur lors de la réservation :', error.response?.data || error.message);
+    alert('Erreur lors de la réservation. Consultez la console pour plus de détails.');
   }
 };
+
+
 
 
 const closeBookingModal = () => {
