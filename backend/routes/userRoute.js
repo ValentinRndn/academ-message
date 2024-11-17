@@ -5,6 +5,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const checkAdmin = require('../middleware/checkAdmin');
 const multer = require('multer');
+const stripe = require('stripe')('sk_test_51LmhGsHQanXHoJn0RTN8E60pZA6VlweUCRsEKA5o0Xwnucm1UKCNRJGwUYgXXcPajVgfjRp3GgUIme0HbeSGZkR300dtVCPlyy'); // Votre clé Stripe
 
 
 
@@ -71,7 +72,6 @@ router.get('/users', auth, async (req, res) => {
   }
 });
 
-// Route pour permettre à un admin de créer un professeur
 router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
   const { name, email, subject, password, bio } = req.body;
 
@@ -82,6 +82,16 @@ router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    // Créer un compte Stripe Connect pour le professeur
+    const stripeAccount = await stripe.accounts.create({
+      type: 'express', // Utilisez Stripe Connect Express
+      email: email,
+    });
+
+    if (!stripeAccount || !stripeAccount.id) {
+      return res.status(500).json({ message: 'Erreur lors de la création du compte Stripe.' });
+    }
+
     // Créer un nouvel utilisateur avec le rôle de professeur
     user = new User({
       name,
@@ -89,7 +99,8 @@ router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
       subject,
       password,
       bio,
-      role: 'professor' // Spécifier le rôle de professeur
+      role: 'professor', // Spécifier le rôle de professeur
+      stripeAccountId: stripeAccount.id, // Associez l'id Stripe au professeur
     });
 
     // Hashage du mot de passe avant de sauvegarder
@@ -101,8 +112,8 @@ router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
 
     res.status(201).json({ message: 'Professor created successfully', user });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('Erreur lors de la création du professeur :', err.message);
+    res.status(500).json({ message: 'Erreur lors de la création du professeur' });
   }
 });
 

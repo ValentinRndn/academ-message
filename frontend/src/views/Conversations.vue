@@ -158,13 +158,13 @@ const bookingDate = ref('');
 const bookingTime = ref('');
 const totalAmount = ref(0); // Initialisez avec une valeur par défaut
 
-const professorStripeAccountId = 'acct_1QKhSjELvCyE3pew';
+const professorStripeAccountId = ref('');
+
 let userId = null;
 const availableTimes = ref([...Array(24).keys()].flatMap(h => [`${String(h).padStart(2, '0')}:00`, `${String(h).padStart(2, '0')}:30`]));
 
 const sortedConversations = computed(() => conversations.value.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)));
 const selectedConversation = computed(() => conversations.value.find(convo => convo._id === selectedConversationId.value));
-const isConfirmationModalOpen = ref(false);
 const selectedProfessor = ref(null); 
 
 const loadConversations = async () => {
@@ -189,16 +189,25 @@ const loadConversations = async () => {
 };
 
 const selectConversation = (conversationId) => {
-    selectedConversationId.value = conversationId;
-    const conversation = conversations.value.find((convo) => convo._id === conversationId);
+  selectedConversationId.value = conversationId;
+  const conversation = conversations.value.find((convo) => convo._id === conversationId);
 
-    if (conversation) {
-        // Définir le professeur sélectionné en fonction de la conversation
-        selectedProfessor.value = getOtherParticipant(conversation.participants);
+  if (conversation) {
+    // Récupérer l'autre participant
+    const otherParticipant = getOtherParticipant(conversation.participants);
+
+    if (otherParticipant) {
+      // Définir le professeur sélectionné et récupérer l'id Stripe
+      selectedProfessor.value = otherParticipant;
+      professorStripeAccountId.value = otherParticipant.stripeAccountId; // Utiliser `.value` car c'est une ref
+      console.log('ID Stripe du professeur sélectionné :', professorStripeAccountId.value);
     }
+  }
 
-    socket.emit('join-conversation', conversationId);
+  socket.emit('join-conversation', conversationId);
 };
+
+
 const getOtherParticipant = (participants) => {
   return participants.find(participant => participant._id !== userId);
 };
@@ -252,20 +261,19 @@ const openBookingModal = async () => {
 
 const confirmBooking = async () => {
   try {
-    // Valider la valeur de totalAmount
     console.log('Valeur actuelle de totalAmount :', totalAmount.value);
-if (!totalAmount.value || isNaN(totalAmount.value) || totalAmount.value <= 0) {
-  alert('Veuillez entrer un montant valide.');
-  return;
-}
 
+    if (!totalAmount.value || isNaN(totalAmount.value) || totalAmount.value <= 0) {
+      alert('Veuillez entrer un montant valide.');
+      return;
+    }
 
     const payload = {
       bookingDate: bookingDate.value,
       bookingTime: bookingTime.value,
-      amount: Math.round(totalAmount.value * 100), // Convertir en centimes
+      amount: Math.round(totalAmount.value * 100),
       currency: 'eur',
-      professorStripeAccountId,
+      professorStripeAccountId: professorStripeAccountId.value, // Utilisez `.value`
     };
 
     console.log('Payload envoyé au backend :', payload);
@@ -281,6 +289,8 @@ if (!totalAmount.value || isNaN(totalAmount.value) || totalAmount.value <= 0) {
     alert('Erreur lors de la réservation. Consultez la console pour plus de détails.');
   }
 };
+
+
 
 
 
