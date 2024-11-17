@@ -199,7 +199,7 @@ const selectConversation = (conversationId) => {
     if (otherParticipant) {
       // Définir le professeur sélectionné et récupérer l'id Stripe
       selectedProfessor.value = otherParticipant;
-      professorStripeAccountId.value = otherParticipant.stripeAccountId; // Utiliser `.value` car c'est une ref
+      professorStripeAccountId.value = otherParticipant.stripeAccountId; 
       console.log('ID Stripe du professeur sélectionné :', professorStripeAccountId.value);
     }
   }

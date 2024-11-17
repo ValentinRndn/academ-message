@@ -8,12 +8,24 @@ router.get('/:userId', async (req, res) => {
   try {
     const conversations = await Conversation.find({
       participants: req.params.userId,
-    }).populate('participants messages.sender', 'name email');
+    }).populate([
+      {
+        path: 'participants',
+        select: 'name email stripeAccountId role profilePicture', // Inclure profilePicture
+      },
+      {
+        path: 'messages.sender',
+        select: 'name email profilePicture', // Inclure profilePicture
+      },
+    ]);
+
     res.json(conversations);
   } catch (error) {
+    console.error('Erreur lors de la récupération des conversations :', error);
     res.status(500).json({ message: 'Erreur lors de la récupération des conversations' });
   }
 });
+ 
 
 // Créer une nouvelle conversation
 router.post('/', async (req, res) => {

@@ -36,7 +36,7 @@ app.use('/api/users', require('./routes/userRoute'));
 app.use('/api/conversations', require('./routes/conversationRoute')); 
 app.use('/uploads', express.static('uploads'));
 app.use('/api/booking', require('./routes/bookingRoutes')); 
-
+app.use('/public', express.static('public'));
 // Socket.IO pour gérer les messages en temps réel
 io.on('connection', (socket) => {
 
