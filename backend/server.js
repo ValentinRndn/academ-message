@@ -48,10 +48,8 @@ io.on('connection', (socket) => {
     console.log(`Utilisateur a rejoint la conversation : ${conversationId}`);
   });
 
-  // Recevoir un nouveau message
   socket.on('new-message', async ({ conversationId, message }) => {
     try {
-      // Rechercher la conversation par ID
       const conversation = await Conversation.findById(conversationId);
 
       if (conversation) {
@@ -62,10 +60,17 @@ io.on('connection', (socket) => {
           createdAt: new Date(),
         });
 
-        await conversation.save(); // Sauvegarder la conversation
+        await conversation.save();
 
         // Émettre le message à tous les utilisateurs de la conversation
-        io.to(conversationId).emit('message-received', message);
+        io.to(conversationId).emit('message-received', {
+          conversationId,
+          message: {
+            sender: message.sender,
+            text: message.text,
+            createdAt: new Date(),
+          },
+        });
       }
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement du message:', error);
