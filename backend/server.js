@@ -42,7 +42,6 @@ app.use('/public', express.static('public'));
 io.on('connection', (socket) => {
   console.log('Un utilisateur s\'est connecté:', socket.id);
 
-  // Rejoindre une conversation
   socket.on('join-conversation', (conversationId) => {
     socket.join(conversationId);
     console.log(`Utilisateur a rejoint la conversation : ${conversationId}`);
@@ -51,31 +50,22 @@ io.on('connection', (socket) => {
   socket.on('new-message', async ({ conversationId, message }) => {
     try {
       const conversation = await Conversation.findById(conversationId);
-
       if (conversation) {
-        // Ajouter le message à la conversation
         conversation.messages.push({
-          sender: message.sender, 
+          sender: message.sender,
           text: message.text,
           createdAt: new Date(),
         });
-
         await conversation.save();
 
-        // Émettre le message à tous les utilisateurs de la conversation
-        io.to(conversationId).emit('message-received', {
-          conversationId,
-          message: {
-            sender: message.sender,
-            text: message.text,
-            createdAt: new Date(),
-          },
-        });
+        // Émettez le message à tous les utilisateurs de la conversation
+        io.to(conversationId).emit('message-received', { conversationId, message });
       }
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement du message:', error);
     }
   });
+
 
   // Événement : L'utilisateur est en train d'écrire
   socket.on('typing', ({ conversationId, userId }) => {

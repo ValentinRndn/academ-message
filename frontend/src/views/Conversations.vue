@@ -18,22 +18,23 @@
       </div>
       <div
         v-for="conversation in sortedConversations"
-        :key="conversation._id"
+        :key="conversation?._id"
         class="conversation-item p-3 mb-2 rounded-lg cursor-pointer hover:bg-lightgray"
         :class="{'bg-lightgray': selectedConversationId === conversation._id}"
         @click="selectConversation(conversation._id)"
       >
         <div class="flex items-center gap-3">
           <img
-            :src="getOtherParticipant(conversation.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(conversation.participants).profilePicture}` : '../../assets/profil/default.webp'"
+            :src="getOtherParticipant(conversation?.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(conversation.participants).profilePicture}` : '../../assets/profil/default.webp'"
             alt="Profile"
             class="w-8 h-8 rounded-full"
           />
           <h3 class="font-semibold">
-            {{ getOtherParticipant(conversation.participants).name }}
+            {{ getOtherParticipant(conversation?.participants).name }}
           </h3>
         </div>
-        <p class="text-sm text-gray-300">{{ conversation.messages[conversation.messages.length - 1]?.text }}</p>
+        <p class="text-sm text-gray-300">{{ conversation?.messages?.[conversation?.messages?.length - 1]?.text }}</p>
+
       </div>
     </div>
 
@@ -41,12 +42,12 @@
     <div class="conversation-detail w-3/4 p-4 flex flex-col bg-darkgray rounded-lg h-[89.5vh]">
       <div v-if="selectedConversation" class="flex items-center gap-3 mb-4">
         <img
-          :src="getOtherParticipant(selectedConversation.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(selectedConversation.participants).profilePicture}` : 'http://localhost:5000/public/images/default-profile.webp'"
+          :src="getOtherParticipant(selectedConversation?.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(selectedConversation?.participants).profilePicture}` : 'http://localhost:5000/public/images/default-profile.webp'"
           alt="Profile"
           class="w-10 h-10 rounded-full"
         />
         <h2 class="text-xl font-bold">
-          {{ getOtherParticipant(selectedConversation.participants).name }}
+          {{ getOtherParticipant(selectedConversation?.participants).name }}
         </h2>
         <button
           v-if="selectedConversation && selectedConversation.messages.length >= 15 && userRole !== 'professor'"
@@ -61,25 +62,25 @@
       <div v-if="selectedConversation" class="flex flex-col h-[89.5vh] ">
         <div class="messages-container mb-4 overflow-y-auto">
           <div
-            v-for="message in selectedConversation.messages"
+            v-for="message in selectedConversation?.messages"
             :key="message._id"
-            :class="{'message-left': message.sender._id !== userId, 'message-right': message.sender._id === userId}"
+            :class="{'message-left': message.sender?._id !== userId, 'message-right': message.sender?._id === userId}"
             class="message-item mb-2 flex items-start"
           >
           <img
-          v-if="message.sender._id !== userId"
-          :src="message.sender.profilePicture 
-            ? `http://localhost:5000/uploads/${message.sender.profilePicture}` 
+          v-if="message.sender?._id !== userId"
+          :src="message.sender?.profilePicture 
+            ? `http://localhost:5000/uploads/${message.sender?.profilePicture}` 
             : 'http://localhost:5000/public/images/default-profile.webp'"
           alt="Profile"
           class="w-8 h-8 rounded-full mr-2"
         />
 
             <p
-              :class="{'bg-lightgray text-white p-2 rounded-md': message.sender._id !== userId, 'gradient text-white p-2 rounded-lg ml-auto': message.sender._id === userId}"
+              :class="{'bg-lightgray text-white p-2 rounded-md': message.sender?._id !== userId, 'gradient text-white p-2 rounded-lg ml-auto': message.sender?._id === userId}"
               class="message-text"
             >
-              {{ message.text }}
+              {{ message?.text }}
             </p>
           </div>
         </div>
@@ -222,28 +223,40 @@ const selectConversation = (conversationId) => {
 const getOtherParticipant = (participants) => {
   return participants.find(participant => participant._id !== userId);
 };
-
 const sendMessage = async () => {
   if (newMessage.value.trim() !== '' && selectedConversation.value) {
     const message = {
       sender: userId,
       text: newMessage.value,
     };
+
     try {
-      await axios.post(`http://localhost:5000/api/conversations/${selectedConversationId.value}/message`, {
-        senderId: userId,
-        text: newMessage.value,
+      const response = await axios.post(
+        `http://localhost:5000/api/conversations/${selectedConversationId.value}/message`,
+        message
+      );
+
+      // Si la réponse contient le message enregistré, émettez-le via Socket.IO
+      socket.emit('new-message', {
+        conversationId: selectedConversationId.value,
+        message: response.data,
       });
-      selectedConversation.value.messages.push({
-        sender: { _id: userId, name: 'Moi' },
-        text: newMessage.value,
-      });
+
+      // Ajoutez le message localement
+      if (selectedConversation.value.messages) {
+        selectedConversation.value.messages.push(response.data);
+      } else {
+        selectedConversation.value.messages = [response.data];
+      }
+
       newMessage.value = '';
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message', error);
     }
   }
 };
+
+
 
 const openBookingModal = async () => {
   try {
@@ -322,8 +335,9 @@ const stopTyping = () => {
 
 
 
-onMounted(loadConversations);
 onMounted(() => {
+  loadConversations();
+
   socket.on('user-typing', (typingUserId) => {
     if (typingUserId !== userId) {
       isTyping.value = true;
@@ -335,7 +349,25 @@ onMounted(() => {
       isTyping.value = false;
     }
   });
+
+socket.on('message-received', ({ conversationId, message }) => {
+  if (selectedConversationId.value === conversationId) {
+    // Vérifiez si le message a déjà été ajouté (évitez les doublons)
+    if (!selectedConversation.value.messages.some(msg => msg._id === message._id)) {
+      selectedConversation.value.messages.push(message);
+    }
+  } else {
+    const conversation = conversations.value.find(convo => convo._id === conversationId);
+    if (conversation) {
+      if (!conversation.messages.some(msg => msg._id === message._id)) {
+        conversation.messages.push(message);
+      }
+    }
+  }
 });
+
+});
+
 </script>
 
 <style scoped>
