@@ -1,104 +1,165 @@
 <template>
-  <nav class="navbar bg-darkgray mb-4">
+  <nav class="navbar text-white mb-4 shadow-lg ">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
         <div class="flex-shrink-0 flex items-center">
-          <router-link to="/" class="text-2xl font-bold textGradient">Academ-Message</router-link>
+          <router-link to="/" class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+            Academ-Message
+          </router-link>
         </div>
 
-        <!-- Navigation Links pour petits écrans -->
-        <div class="flex md:hidden space-x-8 font-semibold text-lg">
+        <!-- Navigation Links -->
+        <div class="flex md:hidden space-x-8 font-medium text-lg">
           <router-link 
             v-if="userRole === 'admin'" 
             to="/adminPage" 
-            class="text-white hover:text-purplee" 
-            :class="{ 'active-link': $route.path === '/adminPage' }"
+            class="hover:text-purple-400 transition"
+            :class="{ 'underline decoration-2 decoration-purple-500': $route.path === '/adminPage' }"
           >
             Accueil
           </router-link>
           <router-link 
             to="/" 
-            class="text-white hover:text-purplee" 
-            :class="{ 'active-link': $route.path === '/' }"
+            class="hover:text-purple-400 transition"
+            :class="{ 'underline decoration-2 decoration-purple-500': $route.path === '/' }"
           >
             Conversations
           </router-link>
           <router-link 
             to="/professors" 
-            class="text-white hover:text-purplee" 
-            :class="{ 'active-link': $route.path === '/professors' }"
+            class="hover:text-purple-400 transition"
+            :class="{ 'underline decoration-2 decoration-purple-500': $route.path === '/professors' }"
           >
             Professeurs
           </router-link>
         </div>
 
-        <!-- Boutons d'authentification ou photo de profil -->
+        <!-- Auth/Profil Section -->
         <div class="flex md:hidden items-center space-x-4">
           <template v-if="isAuthenticated">
-            <div class="relative profil-container flex items-center justify-center">
+            <div class="relative profil-container flex items-center">
               <img
                 :src="userProfilePicture"
                 alt="Profile"
-                class="w-10 h-10 rounded-full border border-gray-300 cursor-pointer"
+                class="w-10 h-10 rounded-full border border-gray-600 cursor-pointer"
                 @click="toggleProfileMenu"
               />
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                :class="['cursor-pointer text-white transition transform duration-200', isProfileMenuOpen ? 'rotate-180' : 'rotate-0']"
+                class="w-6 h-6 ml-2 text-gray-300 cursor-pointer transform transition-transform duration-200"
+                :class="{ 'rotate-180': isProfileMenuOpen }"
                 @click="toggleProfileMenu"
+                fill="currentColor"
+                viewBox="0 0 24 24"
               >
-                <path fill="currentColor" d="m12 15.4l-6-6L7.4 8l4.6 4.6L16.6 8L18 9.4z" />
+                <path d="m12 15.4l-6-6L7.4 8l4.6 4.6L16.6 8L18 9.4z" />
               </svg>
 
-              <!-- Menu déroulant -->
-              <div v-if="isProfileMenuOpen" class="absolute right-0 mt-32 w-48 backdrop-blur-xl bg-darkgray border border-white shadow-lg rounded-md z-20">
-                <ul class="py-1 text-white">
+              <!-- Dropdown Menu -->
+              <div
+                v-if="isProfileMenuOpen"
+                class="absolute right-0 mt-40 w-48 back border border-gray-700 rounded-lg shadow-lg z-20"
+              >
+                <ul class="py-2 text-sm text-gray-200">
                   <li>
-                    <router-link to="profileParameter" class="block px-4 py-2 hover:bg-lightgray cursor-pointer">Paramètre profil</router-link>
+                    <router-link 
+                      to="profileParameter" 
+                      class="block px-4 py-2 hover:bg-gray-800 rounded-lg transition"
+                    >
+                      Paramètre profil
+                    </router-link>
                   </li>
                   <li>
-                    <a @click="logout" class="block px-4 py-2 hover:bg-lightgray cursor-pointer">Se déconnecter</a>
+                    <a 
+                      @click="logout" 
+                      class="block px-4 py-2 hover:bg-gray-800 rounded-lg transition cursor-pointer"
+                    >
+                      Se déconnecter
+                    </a>
                   </li>
                 </ul>
               </div>
             </div>
           </template>
           <template v-else>
-            <button @click="goToLogin" class="text-purplee rounded-lg border border-purplee p-2 hover:text-white">
+            <button 
+              @click="goToLogin" 
+              class="text-purple-500 border border-purple-500 px-4 py-2 rounded-lg hover:bg-purple-500 hover:text-white transition"
+            >
               Se connecter | S'inscrire
             </button>
           </template>
         </div>
 
-        <!-- Mobile Menu Button pour grands écrans -->
+        <!-- Mobile Menu Button -->
         <div class="hidden md:flex items-center">
-          <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="text-gray-500 hover:text-gray-900 focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          <button 
+            @click="isMobileMenuOpen = !isMobileMenuOpen" 
+            class="text-gray-500 hover:text-gray-300 focus:outline-none transition"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              class="h-6 w-6" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                stroke-width="2" 
+                d="M4 6h16M4 12h16M4 18h16" 
+              />
             </svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Menu Mobile pour grands écrans -->
-    <div v-if="isMobileMenuOpen" class="hidden md:flex bg-white border-t border-gray-200">
-      <div class="pt-2 pb-3 space-y-1">
-        <router-link to="/" class="block px-4 py-2 text-gray-500 hover:text-gray-900" :class="{ 'active-link': $route.path === '/' }">Accueil</router-link>
-        <router-link to="/" class="block px-4 py-2 text-gray-500 hover:text-gray-900" :class="{ 'active-link': $route.path === '/' }">Conversations</router-link>
-        <router-link to="/professors" class="block px-4 py-2 text-gray-500 hover:text-gray-900" :class="{ 'active-link': $route.path === '/professors' }">Professeurs</router-link>
+    <!-- Mobile Menu -->
+    <div v-if="isMobileMenuOpen" class="hidden md:flex bg-gray-800 border-t border-gray-700 ">
+      <div class="py-2 space-y-1">
+        <router-link 
+          to="/" 
+          class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition"
+          :class="{ 'bg-gray-700': $route.path === '/' }"
+        >
+          Accueil
+        </router-link>
+        <router-link 
+          to="/" 
+          class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition"
+          :class="{ 'bg-gray-700': $route.path === '/' }"
+        >
+          Conversations
+        </router-link>
+        <router-link 
+          to="/professors" 
+          class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition"
+          :class="{ 'bg-gray-700': $route.path === '/professors' }"
+        >
+          Professeurs
+        </router-link>
       </div>
-      <div class="py-3 border-t border-gray-200">
-        <button @click="goToLogin" class="block w-full text-left px-4 py-2 text-gray-500 hover:text-gray-900">Se connecter</button>
-        <button @click="goToSignup" class="block w-full text-left px-4 py-2 bg-blue-500 text-white hover:bg-blue-600">S'inscrire</button>
+      <div class="py-3 border-t border-gray-700">
+        <button 
+          @click="goToLogin" 
+          class="block w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 transition"
+        >
+          Se connecter
+        </button>
+        <button 
+          @click="goToSignup" 
+          class="block w-full text-left px-4 py-2 bg-purple-500 text-white hover:bg-purple-600 transition rounded-lg"
+        >
+          S'inscrire
+        </button>
       </div>
     </div>
   </nav>
 </template>
+
 
 
 <script>
@@ -168,5 +229,10 @@ export default {
   text-underline-offset: 4px; 
   text-decoration-thickness: 2px; 
   color: rgba(217,167,228,1);
+}
+
+.navbar {
+  background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
+
 }
 </style>

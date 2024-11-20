@@ -14,12 +14,13 @@
 
 
   .gradient {
-    background: rgb(205,208,224);
-    background: linear-gradient(304deg, rgba(205,208,224,1) 0%, rgba(187,185,228,1) 29%, rgba(217,167,228,1) 72%, rgba(229,188,255,1) 100%);
+    background: linear-gradient(135deg, rgba(205, 208, 224, 1) 0%, rgba(187, 185, 228, 1) 35%, rgba(217, 167, 228, 1) 65%, rgba(229, 188, 255, 1) 100%);
+
   }
 
   .textGradient {
-    background: linear-gradient(304deg, rgba(205,208,224,1) 0%, rgba(187,185,228,1) 29%, rgba(217,167,228,1) 72%, rgba(229,188,255,1) 100%);
+    background: linear-gradient(135deg, rgba(205, 208, 224, 1) 0%, rgba(187, 185, 228, 1) 35%, rgba(217, 167, 228, 1) 65%, rgba(229, 188, 255, 1) 100%);
+
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -35,5 +36,10 @@
 
 input {
   @apply w-full p-2 rounded-lg border-b border-gray-500
+}
+
+.back {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+
 }
 

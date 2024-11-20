@@ -1,84 +1,94 @@
 <template>
-    <div class="profile-update p-8 bg-gray-100 min-h-screen">
-      <h1 class="text-3xl font-bold text-gray-800 mb-8">Modifier le profil</h1>
-  
-      <form @submit.prevent="updateProfile">
-        <!-- Champ pour le nom -->
-        <div class="form-group mb-4">
-          <label for="name" class="block text-sm font-medium text-gray-700">Nom</label>
-          <input
-            type="text"
-            id="name"
-            v-model="formData.name"
-            class="mt-1 p-2 w-full border border-gray-300 rounded-md"
-          />
-        </div>
-  
-        <!-- Champ pour l'email -->
-        <div class="form-group mb-4">
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-          <input
-            type="email"
-            id="email"
-            v-model="formData.email"
-            class="mt-1 p-2 w-full border border-gray-300 rounded-md"
-          />
-        </div>
 
-                <!-- Champ pour l'id stripe -->
-                <div class="form-group mb-4">
-          <label for="idStripe" class="block text-sm font-medium text-gray-700">ID du compte Stripe</label>
-          <input
-            type="text"
-            id="idStripe"
-            v-model="formData.idstripe"
-            class="mt-1 p-2 w-full border border-gray-300 rounded-md"
-          />
-        </div>
-  
-        <!-- Champ pour le mot de passe (optionnel) -->
-        <div class="form-group mb-4">
-          <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
-          <input
-            type="password"
-            id="password"
-            v-model="formData.password"
-            placeholder="Laissez vide pour ne pas changer"
-            class="mt-1 p-2 w-full border border-gray-300 rounded-md"
-          />
-        </div>
-  
-        <!-- Champ pour télécharger une photo de profil -->
-        <div class="form-group mb-4">
-          <label for="profilePicture" class="block text-sm font-medium text-gray-700">Photo de profil</label>
-          <input
-            type="file"
-            id="profilePicture"
-            @change="onFileChange"
-            class="mt-1"
-          />
-        </div>
-  
-        <!-- Prévisualisation de la photo de profil -->
-        <div v-if="profilePictureUrl" class="mb-4">
-          <img :src="profilePictureUrl" alt="Prévisualisation" class="w-24 h-24 rounded-full" />
-        </div>
-  
-        <!-- Bouton de mise à jour -->
-        <button
-          type="submit"
-          class="bg-green-300 text-black px-4 py-2 rounded-md hover:bg-blue-600"
-        >
-          Mettre à jour le profil
-        </button>
-      </form>
-    </div>
-  </template>
+  <Navbar />
+  <div class="p-8  min-h-screen text-white">
+    <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-8">
+      Modifier le profil
+    </h1>
+
+    <form @submit.prevent="updateProfile" class="update-container p-6 rounded-lg shadow-lg max-w-xl mx-auto">
+      <!-- Champ pour le nom -->
+      <div class="form-group mb-6">
+        <label for="name" class="block text-sm font-medium text-gray-300">Nom</label>
+        <input
+          type="text"
+          id="name"
+          v-model="formData.name"
+          class="mt-2 p-3 w-full border border-gray-600 rounded-lg bg-transparent text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- Champ pour l'email -->
+      <div class="form-group mb-6">
+        <label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+        <input
+          type="email"
+          id="email"
+          v-model="formData.email"
+          class="mt-2 p-3 w-full border border-gray-600 rounded-lg bg-transparent text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- Champ pour l'ID Stripe -->
+      <div class="form-group mb-6">
+        <label for="idStripe" class="block text-sm font-medium text-gray-300">ID du compte Stripe</label>
+        <input
+          type="text"
+          id="idStripe"
+          v-model="formData.idstripe"
+          class="mt-2 p-3 w-full border border-gray-600 rounded-lg bg-transparent text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- Champ pour le mot de passe (optionnel) -->
+      <div class="form-group mb-6">
+        <label for="password" class="block text-sm font-medium text-gray-300">Mot de passe</label>
+        <input
+          type="password"
+          id="password"
+          v-model="formData.password"
+          placeholder="Laissez vide pour ne pas changer"
+          class="mt-2 p-3 w-full border border-gray-600 rounded-lg bg-transparent text-white focus:ring-2 focus:ring-purple-500 focus:outline-none"
+        />
+      </div>
+
+      <!-- Champ pour télécharger une photo de profil -->
+      <div class="form-group mb-6">
+        <label for="profilePicture" class="block text-sm font-medium text-gray-300">Photo de profil</label>
+        <input
+          type="file"
+          id="profilePicture"
+          @change="onFileChange"
+          class="mt-2 text-gray-300"
+        />
+      </div>
+
+      <!-- Prévisualisation de la photo de profil -->
+      <div v-if="profilePictureUrl" class="mb-6">
+        <img
+          :src="profilePictureUrl"
+          alt="Prévisualisation"
+          class="w-24 h-24 rounded-full mx-auto border-2 border-purple-500"
+        />
+      </div>
+
+      <!-- Bouton de mise à jour -->
+      <button
+        type="submit"
+        class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg shadow-md hover:shadow-lg transition"
+      >
+        Mettre à jour le profil
+      </button>
+    </form>
+  </div>
+</template>
+
   
   <script setup>
   import { ref, onMounted } from 'vue';
   import axios from 'axios';
-  
+  import Navbar from '../components/Navbar.vue';
+
   const formData = ref({
     name: '',
     email: '',
@@ -154,6 +164,10 @@
   </script>
   
   <style scoped>
-  /* Styles supplémentaires pour améliorer l'UI */
+.update-container {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+}
   </style>
   

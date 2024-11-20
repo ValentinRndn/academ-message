@@ -1,5 +1,5 @@
 <template>
-  <div class="app font-quicksand gradient h-screen overflow-y-hidden">
+  <div class="app font-quicksand  h-screen overflow-y-hidden">
 
 
     <router-view />
@@ -7,7 +7,10 @@
 </template>
 
 <style>
+.app {
+  background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
 
+}
 </style>
 
 <script setup> 

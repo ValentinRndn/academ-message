@@ -1,28 +1,48 @@
 <template>
   <navbar />
-    <div class="p-8  min-h-screen">
-  
-      <!-- Affichage des détails du professeur -->
-      <div v-if="professor" class="professor-detail bg-darkgray  p-10 rounded-lg shadow-md relative">
+  <div class="back min-h-screen">
+    <!-- Affichage des détails du professeur -->
+    <div
+      v-if="professor"
+      class="professor-detail bg-gray-900 p-8 rounded-lg shadow-lg relative max-w-2xl mx-auto text-white"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        @click="goBack"
+        class="mb-4 text-gray-400 cursor-pointer hover:text-gray-300 transition"
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+      >
+        <path
+          fill="currentColor"
+          d="m7.825 13l4.9 4.9q.3.3.288.7t-.313.7q-.3.275-.7.288t-.7-.288l-6.6-6.6q-.15-.15-.213-.325T4.426 12t.063-.375t.212-.325l6.6-6.6q.275-.275.688-.275t.712.275q.3.3.3.713t-.3.712L7.825 11H19q.425 0 .713.288T20 12t-.288.713T19 13z"
+        />
+      </svg>
+      <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-4">
+        {{ professor.name }}
+      </h2>
+      <p class="mb-2">
+        <strong class="text-purple-500">Matière :</strong> {{ professor.subject }}
+      </p>
+      <p class="mb-2">
+        <strong class="text-purple-500">Biographie :</strong> {{ professor.bio }}
+      </p>
+      <p class="mb-2">
+        <strong class="text-purple-500">Années d'expérience :</strong> {{ professor.experience }} ans
+      </p>
 
-        <svg xmlns="http://www.w3.org/2000/svg" @click="goBack" class="mb-4 text-white" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="m7.825 13l4.9 4.9q.3.3.288.7t-.313.7q-.3.275-.7.288t-.7-.288l-6.6-6.6q-.15-.15-.213-.325T4.426 12t.063-.375t.212-.325l6.6-6.6q.275-.275.688-.275t.712.275q.3.3.3.713t-.3.712L7.825 11H19q.425 0 .713.288T20 12t-.288.713T19 13z"/></svg>
-        <h2 class="text-2xl font-bold text-purplee">{{ professor.name }}</h2>
-        <p class="text-white mt-2"><strong>Matière : </strong>{{ professor.subject }}</p>
-        <p class="text-white mt-2"><strong>Biographie : </strong>{{ professor.bio }}</p>
-        <p class="text-white mt-2"><strong>Années d'expérience : </strong>{{ professor.experience }} ans</p>
-
-        <button
-          v-if="professor && userRole !== 'professor'"
-          @click="createConversation(professor._id)"
-          class="gradient text-black p-2 rounded-md hover:bg-green-600 absolute bottom-2 right-2"
-        >
-          Contacter
-        </button>
-      </div>
-  
-
+      <button
+        v-if="professor && userRole !== 'professor'"
+        @click="createConversation(professor._id)"
+        class="absolute bottom-4 right-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-lg shadow-md hover:shadow-lg transition"
+      >
+        Contacter
+      </button>
     </div>
-  </template>
+  </div>
+</template>
+
   
   <script setup>
 import { ref, onMounted } from 'vue';
@@ -102,5 +122,10 @@ const createConversation = async (professorId) => {
   .professor-detail {
     max-width: 600px;
     margin: 0 auto;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+
+
   }
+
+  
   </style>
