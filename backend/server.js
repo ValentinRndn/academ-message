@@ -50,21 +50,30 @@ io.on('connection', (socket) => {
   socket.on('new-message', async ({ conversationId, message }) => {
     try {
       const conversation = await Conversation.findById(conversationId);
+  
       if (conversation) {
+        // Vérifiez si un message identique existe
+        const isDuplicate = conversation.messages.some(
+          msg => msg.text === message.text && msg.sender.toString() === message.sender
+        );
+        if (isDuplicate) {
+          return;
+        }
+  
         conversation.messages.push({
           sender: message.sender,
           text: message.text,
           createdAt: new Date(),
         });
         await conversation.save();
-
-        // Émettez le message à tous les utilisateurs de la conversation
+  
         io.to(conversationId).emit('message-received', { conversationId, message });
       }
     } catch (error) {
       console.error('Erreur lors de l\'enregistrement du message:', error);
     }
   });
+  
 
 
   // Événement : L'utilisateur est en train d'écrire

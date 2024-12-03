@@ -73,7 +73,7 @@ router.post('/:id/message', async (req, res) => {
       return res.status(404).json({ message: 'Conversation non trouvée' });
     }
 
-    // Ajouter le message
+    // Créer un nouveau message
     const newMessage = {
       sender: senderId,
       text,
@@ -82,13 +82,19 @@ router.post('/:id/message', async (req, res) => {
     conversation.messages.push(newMessage);
     await conversation.save();
 
-    // Retournez uniquement le message ajouté
-    res.status(201).json(newMessage);
+    // Récupérez le dernier message avec ses détails
+    const updatedConversation = await Conversation.findById(req.params.id)
+      .populate('messages.sender', 'name email profilePicture'); // Populate les informations de l'expéditeur
+
+    const savedMessage = updatedConversation.messages[updatedConversation.messages.length - 1];
+
+    res.status(201).json(savedMessage);
   } catch (error) {
     console.error('Erreur lors de l\'ajout du message :', error);
     res.status(500).json({ message: 'Erreur interne lors de l\'ajout du message' });
   }
 });
+
 
 
 

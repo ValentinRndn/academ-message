@@ -345,19 +345,14 @@ onMounted(() => {
   });
 
   socket.on('message-received', ({ conversationId, message }) => {
-  console.log('Message reçu via Socket.IO :', { conversationId, message });
-
   const conversation = conversations.value.find(convo => convo._id === conversationId);
   if (conversation) {
-    // Vérifiez si le message est déjà présent avant de l'ajouter
     if (!conversation.messages.some(msg => msg._id === message._id)) {
       conversation.messages.push(message);
-      console.log('Message ajouté à la conversation locale :', message);
-    } else {
-      console.log('Message déjà présent, non ajouté :', message);
     }
   }
 });
+
 
 
 
