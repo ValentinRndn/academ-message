@@ -23,6 +23,8 @@
         :class="{ 'bg-gray-700': selectedConversationId === conversation._id }"
         @click="selectConversation(conversation._id)"
       >
+
+
         <div class="flex items-center gap-3">
           <img
             :src="getOtherParticipant(conversation?.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(conversation.participants).profilePicture}` : '../../assets/profil/default.webp'"
@@ -82,7 +84,9 @@
             </p>
           </div>
         </div>
-
+        <div v-if="isTyping && selectedConversationId" class="typing-indicator text-gray-400 italic">
+        L'autre utilisateur est en train d'écrire...
+      </div>
         <div class="message-input flex items-center gap-4 p-4">
           <input
             v-model="newMessage"
