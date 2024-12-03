@@ -157,9 +157,25 @@ const loadConversations = async () => {
 
   try {
     const response = await axios.get(`http://localhost:5000/api/conversations/${userId}`);
-    conversations.value = response.data;
+    console.log('Conversations récupérées :', response.data);
 
-    // Sélectionner la conversation la plus récente par défaut
+    conversations.value = response.data.map(conversation => {
+      if (conversation.messages) {
+        // Filtrer les doublons
+        const uniqueMessages = conversation.messages.reduce((unique, msg) => {
+          if (!unique.some(existingMsg =>
+            existingMsg.text === msg.text &&
+            existingMsg.sender?._id === msg.sender?._id &&
+            existingMsg.createdAt === msg.createdAt)) {
+            unique.push(msg);
+          }
+          return unique;
+        }, []);
+        conversation.messages = uniqueMessages;
+      }
+      return conversation;
+    });
+
     if (sortedConversations.value.length > 0) {
       selectConversation(sortedConversations.value[0]._id);
     }
@@ -167,6 +183,12 @@ const loadConversations = async () => {
     console.error('Erreur lors du chargement des conversations', error);
   }
 };
+
+
+
+
+
+
 
 const selectConversation = (conversationId) => {
   selectedConversationId.value = conversationId;
@@ -191,38 +213,42 @@ const selectConversation = (conversationId) => {
 const getOtherParticipant = (participants) => {
   return participants.find(participant => participant._id !== userId);
 };
+
+
 const sendMessage = async () => {
-  if (newMessage.value.trim() !== '' && selectedConversation.value) {
-    const message = {
-      sender: userId,
-      text: newMessage.value,
-    };
+  if (newMessage.value.trim() === '' || !selectedConversation.value) {
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        `http://localhost:5000/api/conversations/${selectedConversationId.value}/message`,
-        message
-      );
+  const messageText = newMessage.value.trim();
+  newMessage.value = ''; // Réinitialiser le champ d'entrée
 
-      // Si la réponse contient le message enregistré, émettez-le via Socket.IO
-      socket.emit('new-message', {
-        conversationId: selectedConversationId.value,
-        message: response.data,
-      });
+  try {
+    const response = await axios.post(
+      `http://localhost:5000/api/conversations/${selectedConversationId.value}/message`,
+      { senderId: userId, text: messageText }
+    );
 
-      // Ajoutez le message localement
-      if (selectedConversation.value.messages) {
-        selectedConversation.value.messages.push(response.data);
-      } else {
-        selectedConversation.value.messages = [response.data];
-      }
+    const newMessage = response.data;
 
-      newMessage.value = '';
-    } catch (error) {
-      console.error('Erreur lors de l\'envoi du message', error);
+    if (!selectedConversation.value.messages.some(msg => msg._id === newMessage._id)) {
+      selectedConversation.value.messages.push(newMessage);
     }
+
+    socket.emit('new-message', {
+      conversationId: selectedConversationId.value,
+      message: newMessage,
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de l\'envoi du message', error);
+    alert('Erreur lors de l\'envoi du message. Veuillez réessayer.');
   }
 };
+
+
+
+
 
 
 
@@ -318,21 +344,25 @@ onMounted(() => {
     }
   });
 
-socket.on('message-received', ({ conversationId, message }) => {
-  if (selectedConversationId.value === conversationId) {
-    // Vérifiez si le message a déjà été ajouté (évitez les doublons)
-    if (!selectedConversation.value.messages.some(msg => msg._id === message._id)) {
-      selectedConversation.value.messages.push(message);
-    }
-  } else {
-    const conversation = conversations.value.find(convo => convo._id === conversationId);
-    if (conversation) {
-      if (!conversation.messages.some(msg => msg._id === message._id)) {
-        conversation.messages.push(message);
-      }
+  socket.on('message-received', ({ conversationId, message }) => {
+  console.log('Message reçu via Socket.IO :', { conversationId, message });
+
+  const conversation = conversations.value.find(convo => convo._id === conversationId);
+  if (conversation) {
+    // Vérifiez si le message est déjà présent avant de l'ajouter
+    if (!conversation.messages.some(msg => msg._id === message._id)) {
+      conversation.messages.push(message);
+      console.log('Message ajouté à la conversation locale :', message);
+    } else {
+      console.log('Message déjà présent, non ajouté :', message);
     }
   }
 });
+
+
+
+
+
 
 });
 

@@ -62,29 +62,34 @@ router.post('/', async (req, res) => {
 router.post('/:id/message', async (req, res) => {
   const { senderId, text } = req.body;
 
+  if (!senderId || !text) {
+    return res.status(400).json({ message: 'Le senderId et le texte du message sont requis.' });
+  }
+
   try {
-    // Trouver la conversation par ID
     const conversation = await Conversation.findById(req.params.id);
 
     if (!conversation) {
       return res.status(404).json({ message: 'Conversation non trouvée' });
     }
 
-    // Ajouter le message à la conversation
-    conversation.messages.push({
+    // Ajouter le message
+    const newMessage = {
       sender: senderId,
       text,
-    });
-
-    // Sauvegarder la conversation mise à jour
+      createdAt: new Date(),
+    };
+    conversation.messages.push(newMessage);
     await conversation.save();
 
-    res.status(201).json(conversation);
+    // Retournez uniquement le message ajouté
+    res.status(201).json(newMessage);
   } catch (error) {
     console.error('Erreur lors de l\'ajout du message :', error);
     res.status(500).json({ message: 'Erreur interne lors de l\'ajout du message' });
   }
 });
+
 
 
 module.exports = router;
