@@ -137,7 +137,7 @@ const isBookingModalOpen = ref(false);
 const bookingDate = ref('');
 const bookingTime = ref('');
 const totalAmount = ref(0); 
-
+let isSendingMessage = false;
 const professorStripeAccountId = ref('');
 
 let userId = null;
@@ -216,14 +216,18 @@ const getOtherParticipant = (participants) => {
 
 
 const sendMessage = async () => {
-  if (newMessage.value.trim() === '' || !selectedConversation.value) {
+  if (newMessage.value.trim() === '' || !selectedConversation.value || isSendingMessage) {
     return;
   }
 
+  console.log('Message prêt à être envoyé :', { text: newMessage.value.trim(), senderId: userId });
+
+  isSendingMessage = true;
   const messageText = newMessage.value.trim();
   newMessage.value = ''; // Réinitialiser le champ d'entrée
 
   try {
+    // Envoyer le message à l'API
     const response = await axios.post(
       `http://localhost:5000/api/conversations/${selectedConversationId.value}/message`,
       { senderId: userId, text: messageText }
@@ -231,22 +235,22 @@ const sendMessage = async () => {
 
     const newMessage = response.data;
 
+    // Afficher localement le message envoyé
     if (!selectedConversation.value.messages.some(msg => msg._id === newMessage._id)) {
       selectedConversation.value.messages.push(newMessage);
     }
 
+    // Émettre l'événement Socket.IO pour informer les autres clients
     socket.emit('new-message', {
       conversationId: selectedConversationId.value,
       message: newMessage,
     });
-
   } catch (error) {
     console.error('Erreur lors de l\'envoi du message', error);
-    alert('Erreur lors de l\'envoi du message. Veuillez réessayer.');
+  } finally {
+    isSendingMessage = false;
   }
 };
-
-
 
 
 

@@ -62,7 +62,10 @@ router.post('/', async (req, res) => {
 router.post('/:id/message', async (req, res) => {
   const { senderId, text } = req.body;
 
+  console.log('Requête reçue à /message :', { senderId, text });
+
   if (!senderId || !text) {
+    console.error('Requête invalide : senderId ou texte manquant');
     return res.status(400).json({ message: 'Le senderId et le texte du message sont requis.' });
   }
 
@@ -70,23 +73,40 @@ router.post('/:id/message', async (req, res) => {
     const conversation = await Conversation.findById(req.params.id);
 
     if (!conversation) {
+      console.error('Conversation non trouvée pour l\'ID :', req.params.id);
       return res.status(404).json({ message: 'Conversation non trouvée' });
     }
 
-    // Créer un nouveau message
+    // Vérifiez si un message identique existe déjà
+    const isDuplicate = conversation.messages.some(
+      msg => msg.text === text &&
+             msg.sender.toString() === senderId &&
+             new Date(msg.createdAt).getTime() > Date.now() - 1000 // Vérifie les doublons récents
+    );
+
+    if (isDuplicate) {
+      console.warn('Message dupliqué détecté et ignoré');
+      return res.status(409).json({ message: 'Message déjà existant' });
+    }
+
+    console.log('Message accepté pour enregistrement');
+
+    // Créer et sauvegarder le nouveau message
     const newMessage = {
       sender: senderId,
       text,
       createdAt: new Date(),
     };
+
     conversation.messages.push(newMessage);
     await conversation.save();
 
-    // Récupérez le dernier message avec ses détails
+    // Récupérer le dernier message peuplé
     const updatedConversation = await Conversation.findById(req.params.id)
-      .populate('messages.sender', 'name email profilePicture'); // Populate les informations de l'expéditeur
-
+      .populate('messages.sender', 'name email profilePicture');
     const savedMessage = updatedConversation.messages[updatedConversation.messages.length - 1];
+
+    console.log('Message sauvegardé dans la base :', savedMessage);
 
     res.status(201).json(savedMessage);
   } catch (error) {

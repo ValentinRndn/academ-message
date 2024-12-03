@@ -48,31 +48,25 @@ io.on('connection', (socket) => {
   });
 
   socket.on('new-message', async ({ conversationId, message }) => {
+    console.log('Événement new-message reçu :', { conversationId, message });
+  
     try {
       const conversation = await Conversation.findById(conversationId);
   
-      if (conversation) {
-        // Vérifiez si un message identique existe
-        const isDuplicate = conversation.messages.some(
-          msg => msg.text === message.text && msg.sender.toString() === message.sender
-        );
-        if (isDuplicate) {
-          return;
-        }
-  
-        conversation.messages.push({
-          sender: message.sender,
-          text: message.text,
-          createdAt: new Date(),
-        });
-        await conversation.save();
-  
-        io.to(conversationId).emit('message-received', { conversationId, message });
+      if (!conversation) {
+        console.error('Conversation non trouvée pour new-message');
+        return;
       }
+  
+      // Ne pas resauvegarder le message, mais émettre l'événement
+      console.log('Message émis aux autres clients via Socket.IO');
+      io.to(conversationId).emit('message-received', { conversationId, message });
     } catch (error) {
-      console.error('Erreur lors de l\'enregistrement du message:', error);
+      console.error('Erreur lors de la gestion du message via Socket.IO:', error);
     }
   });
+  
+  
   
 
 
