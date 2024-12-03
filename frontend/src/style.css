@@ -11,7 +11,23 @@
 
 
 @layer utilities {
-
+    input, select, option, #time-list, #card-element {
+    width: 100%;
+    padding: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #e8e8e8;
+    margin-bottom: 1.2rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  input:focus {
+    border-color: #a464d4;
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 6px rgba(236, 121, 247, 0.7);
+  }
 
   .gradient {
     background: linear-gradient(135deg, rgba(205, 208, 224, 1) 0%, rgba(187, 185, 228, 1) 35%, rgba(217, 167, 228, 1) 65%, rgba(229, 188, 255, 1) 100%);

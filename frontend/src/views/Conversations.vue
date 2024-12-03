@@ -60,7 +60,7 @@
       </div>
 
       <div v-if="selectedConversation" class="flex-1 flex flex-col h-full">
-        <div class="messages-container flex-1 overflow-y-auto p-4 space-y-4">
+        <div ref="messagesContainer" class="messages-container flex-1 overflow-y-auto p-4 space-y-4">
           <div
             v-for="message in selectedConversation?.messages"
             :key="message._id"
@@ -116,13 +116,51 @@
         <p>Sélectionnez une conversation pour commencer à discuter.</p>
       </div>
     </div>
+        <!-- Modale de réservation avec Stripe -->
+        <div v-if="isBookingModalOpen" class="fixed inset-0  flex justify-center items-center z-50">
+      <div class="modal-container border border-slate-200 text-white p-6 rounded-lg w-96">
+        <h2 class="text-xl font-bold mb-4">Réserver une session</h2>
+        <label class="block mb-2">Date:</label>
+        <input type="date" v-model="bookingDate" class="w-full p-2 mb-4 border rounded-md" />
+        
+        <label class="block mb-2">Heure:</label>
+        <select v-model="bookingTime" class="w-full p-2 mb-4 border rounded-mdc">
+          <option id="time-list" v-for="time in availableTimes" :key="time" :value="time">{{ time }}</option>
+        </select>
+
+        <!-- Input pour le montant -->
+        <label class="block mb-2">Montant (€):</label>
+        <input 
+          type="number" 
+          v-model.number="totalAmount" 
+          class="w-full p-2 mb-4 border rounded-md" 
+          min="1" 
+          placeholder="Entrer le montant"
+        />
+
+
+
+
+
+        <!-- Stripe Elements pour la saisie des informations bancaires -->
+        <label class="block mb-2">Coordonnées bancaires:</label>
+        <div id="card-element" class="text-white mb-4 "></div>
+        
+        <div class="flex justify-end space-x-4">
+          <button @click="closeBookingModal" class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-900">Annuler</button>
+          <button @click="confirmBooking" class="ml-auto bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition">Confirmer</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  
 </template>
 
 
 <script setup>
 import { loadStripe } from '@stripe/stripe-js';
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import Navbar from '../components/Navbar.vue';
@@ -150,6 +188,15 @@ const availableTimes = ref([...Array(24).keys()].flatMap(h => [`${String(h).padS
 const sortedConversations = computed(() => conversations.value.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)));
 const selectedConversation = computed(() => conversations.value.find(convo => convo._id === selectedConversationId.value));
 const selectedProfessor = ref(null); 
+const messagesContainer = ref(null);
+
+
+function scrollToBottom() {
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+  }
+}
+
 
 const loadConversations = async () => {
   const token = localStorage.getItem('token');
@@ -339,6 +386,7 @@ const stopTyping = () => {
 
 onMounted(() => {
   loadConversations();
+  scrollToBottom();
 
   socket.on('user-typing', (typingUserId) => {
     if (typingUserId !== userId) {
@@ -360,18 +408,19 @@ onMounted(() => {
     }
   }
 });
+});
 
-
-
-
-
-
-
+// Défilement lorsque les messages ou la conversation changent
+watch([selectedConversationId, conversations], () => {
+  scrollToBottom();
 });
 
 </script>
 
 <style scoped>
+.modal-container {
+  background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
+}
 .messenger-layout {
   display: flex;
 }
@@ -400,18 +449,51 @@ onMounted(() => {
 img {
   margin-right: 0.5rem;
 }
-.modal {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  max-width: 400px;
-}
 
 .conversations-list, .conversation-detail {
   background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
   border: 1px solid rgba(255, 255, 255, 0.2);
 
 }
+
+.conversation-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.messages-container {
+  flex: 1; /* Prend tout l'espace disponible */
+  overflow-y: auto; /* Ajoute une barre de défilement si nécessaire */
+  padding: 1rem;
+}
+
+.message-input {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
+  padding: 1rem;
+  z-index: 10; /* Assure que la barre reste au-dessus */
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.messages-container::-webkit-scrollbar {
+  width: 8px; /* Largeur de la scrollbar */
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: #1e1e2f; /* Couleur de l'arrière-plan */
+  border-radius: 10px;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg,#db8ced  0%, #db8ced 100%); /* Couleur de la poignée */
+  border-radius: 10px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg,rgba(217,167,228,1)) ; 
+}
+
 
 
 </style>
