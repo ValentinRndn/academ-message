@@ -27,6 +27,7 @@
             Conversations
           </router-link>
           <router-link 
+          v-if="userRole != 'professor'" 
             to="/professors" 
             class="hover:text-purple-400 transition"
             :class="{ 'underline decoration-2 decoration-purple-500': $route.path === '/professors' }"

@@ -9,7 +9,7 @@
     </header>
 
     <!-- Conteneur principal en deux colonnes -->
-    <div class="dashboard-content grid grid-cols-2 gap-8 lg:grid-cols-1">
+    <div class="dashboard-content grid grid-cols-2 gap-8 md:grid-cols-1">
       <!-- Statistiques générales -->
       <div class="stats bg-gray-800 p-6 rounded-lg shadow-lg">
         <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-4">
@@ -198,10 +198,7 @@ export default {
 
 <style scoped>
 
-.dashboard-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
+
 .stats {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
   border: 1px solid rgba(255, 255, 255, 0.2);
