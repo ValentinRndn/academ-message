@@ -28,9 +28,7 @@
       <p class="mb-2">
         <strong class="text-purple-500">Biographie :</strong> {{ professor.bio }}
       </p>
-      <p class="mb-2">
-        <strong class="text-purple-500">Années d'expérience :</strong> {{ professor.experience }} ans
-      </p>
+
 
       <button
         v-if="professor && userRole !== 'professor'"
@@ -78,13 +76,15 @@ const professor = ref(null);
 onMounted(async () => {
   try {
     const response = await axios.get(`http://localhost:5000/api/users/${professorId}`);
+    console.log('Données du professeur récupérées :', response.data); 
     professor.value = response.data;
   } catch (error) {
     console.error('Erreur lors de la récupération du professeur:', error);
   }
 
-  console.log("Professeur ID:" ,professorId);
+  console.log('Professeur ID :', professorId);
 });
+
 
 // Méthode pour retourner à la liste des professeurs
 const goBack = () => {
@@ -99,8 +99,8 @@ const createConversation = async (professorId) => {
   }
 
   // Ajout de logs pour confirmer les ID envoyés
-  console.log('User ID:', userId); // ID de l'utilisateur connecté
-  console.log('Professor ID:', professorId); // ID du professeur
+  console.log('User ID:', userId); 
+  console.log('Professor ID:', professorId); 
 
   try {
     const response = await axios.post('http://localhost:5000/api/conversations', {
@@ -108,7 +108,7 @@ const createConversation = async (professorId) => {
     });
 
     // Rediriger vers la page de la conversation créée
-    router.push({ name: 'conversationDetail', params: { id: response.data._id } });
+    router.push({ name: 'conversations' });
   } catch (error) {
     console.error('Erreur lors de la création de la conversation:', error);
     alert('Erreur lors de la création de la conversation');

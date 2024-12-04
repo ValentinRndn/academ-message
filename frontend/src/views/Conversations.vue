@@ -1,8 +1,8 @@
 <template>
   <Navbar />
-  <div class="messenger-layout h-full flex text-white m-4 gap-4 md:flex-col">
+  <div class="messenger-layout h-full flex text-white overflow-y-hidden m-4 gap-4 md:flex-col">
     <!-- Liste des conversations (gauche) -->
-    <div class="conversations-list w-1/4  p-4 rounded-lg h-[89.5vh] shadow-lg">
+    <div class="conversations-list w-1/4  p-4 rounded-lg h-[89.5vh]  shadow-lg">
       <div class="top-conversations-list-container flex items-center justify-between h-fit mb-4">
         <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
           Conversations
@@ -118,15 +118,34 @@
     </div>
         <!-- Modale de réservation avec Stripe -->
         <div v-if="isBookingModalOpen" class="fixed inset-0  flex justify-center items-center z-50">
-      <div class="modal-container border border-slate-200 text-white p-6 rounded-lg w-96">
+      <div class="modal-container border border-bordergray shadow-xl text-white p-6 rounded-lg w-96">
         <h2 class="text-xl font-bold mb-4">Réserver une session</h2>
         <label class="block mb-2">Date:</label>
         <input type="date" v-model="bookingDate" class="w-full p-2 mb-4 border rounded-md" />
         
         <label class="block mb-2">Heure:</label>
-        <select v-model="bookingTime" class="w-full p-2 mb-4 border rounded-mdc">
-          <option id="time-list" v-for="time in availableTimes" :key="time" :value="time">{{ time }}</option>
-        </select>
+<div class="custom-select">
+  <!-- Zone pour afficher l'option sélectionnée -->
+  <div class="selected-option  cursor-pointer" @click="toggleDropdown">
+    {{ bookingTime || "Sélectionnez une heure" }}
+  </div>
+
+  <!-- Liste des options -->
+  <ul
+    v-if="isDropdownOpen"
+    class="options-list -mt-[1.2rem] bg-darkgray shadow-lg max-h-48 overflow-y-auto "
+  >
+    <li
+      class="option p-2 hover:bg-gray cursor-pointer"
+      v-for="time in availableTimes"
+      :key="time"
+      @click="selectTime(time)"
+    >
+      {{ time }}
+    </li>
+  </ul>
+</div>
+
 
         <!-- Input pour le montant -->
         <label class="block mb-2">Montant (€):</label>
@@ -181,6 +200,16 @@ const bookingTime = ref('');
 const totalAmount = ref(0); 
 let isSendingMessage = false;
 const professorStripeAccountId = ref('');
+
+const isDropdownOpen = ref(false);
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
+const selectTime = (time) => {
+  bookingTime.value = time;
+  isDropdownOpen.value = false; 
+};
 
 let userId = null;
 const availableTimes = ref([...Array(24).keys()].flatMap(h => [`${String(h).padStart(2, '0')}:00`, `${String(h).padStart(2, '0')}:30`]));
@@ -418,6 +447,18 @@ watch([selectedConversationId, conversations], () => {
 </script>
 
 <style scoped>
+.custom-select {
+  position: relative;
+}
+
+.options-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+
 .modal-container {
   background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
 }
@@ -475,25 +516,5 @@ img {
   z-index: 10; /* Assure que la barre reste au-dessus */
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
-
-.messages-container::-webkit-scrollbar {
-  width: 8px; /* Largeur de la scrollbar */
-}
-
-.messages-container::-webkit-scrollbar-track {
-  background: #1e1e2f; /* Couleur de l'arrière-plan */
-  border-radius: 10px;
-}
-
-.messages-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg,#db8ced  0%, #db8ced 100%); /* Couleur de la poignée */
-  border-radius: 10px;
-}
-
-.messages-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg,rgba(217,167,228,1)) ; 
-}
-
-
 
 </style>

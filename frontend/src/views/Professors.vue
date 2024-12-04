@@ -97,7 +97,8 @@ const goToProfessorDetail = (professorId) => {
 /* Conteneur principal */
 .professors-container {
   background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
-  border: 1px solid rgba(178, 82, 207, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
 }
 h1.textGradient {
   background: linear-gradient(90deg, #ec79f7, #9b59b6);

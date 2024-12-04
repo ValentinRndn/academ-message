@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: '/public/images/default-profile.webp', 
+    default: '/public/images/default-profile.webp',
   },
   role: {
     type: String,
@@ -28,7 +28,6 @@ const UserSchema = new mongoose.Schema({
     default: '',
     validate: {
       validator: function (value) {
-        // Si un stripeAccountId est défini, le rôle doit être 'professor'
         if (value && this.role !== 'professor') {
           return false;
         }
@@ -37,7 +36,32 @@ const UserSchema = new mongoose.Schema({
       message: 'Seuls les professeurs peuvent avoir un compte Stripe.',
     },
   },
+  bio: {
+    type: String,
+    default: '',
+    validate: {
+      validator: function (value) {
+        if (this.role === 'professor' && !value) {
+          return false;
+        }
+        return true;
+      },
+      message: 'Les professeurs doivent fournir une biographie.',
+    },
+  },
+  subject: {
+    type: String,
+    default: '',
+    validate: {
+      validator: function (value) {
+        if (this.role === 'professor' && !value) {
+          return false;
+        }
+        return true;
+      },
+      message: 'Les professeurs doivent spécifier une matière enseignée.',
+    },
+  },
 });
 
 module.exports = mongoose.model('User', UserSchema);
- 

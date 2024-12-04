@@ -11,7 +11,8 @@
 
 
 @layer utilities {
-    input, select, option, #time-list, #card-element {
+    input, select, .selected-option, #time-list, #card-element {
+    appearance: none;
     width: 100%;
     padding: 0.9rem;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -22,6 +23,22 @@
     font-size: 1rem;
     transition: all 0.3s ease;
   }
+
+
+
+  select {
+    appearance: none;
+    width: 100%;
+    padding: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #e8e8e8;
+    margin-bottom: 1.2rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
   input:focus {
     border-color: #a464d4;
     outline: none;
@@ -59,3 +76,22 @@ input {
 
 }
 
+
+/* Style global pour toutes les barres de défilement */
+*::-webkit-scrollbar {
+  width: 8px; /* Largeur de la scrollbar */
+}
+
+*::-webkit-scrollbar-track {
+  background: #1e1e2f; /* Couleur de l'arrière-plan */
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #db8ced 0%, #db8ced 100%); /* Couleur de la poignée */
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(217, 167, 228, 1)); /* Couleur au survol */
+}

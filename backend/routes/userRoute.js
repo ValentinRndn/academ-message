@@ -72,19 +72,23 @@ router.get('/users', auth, async (req, res) => {
   }
 });
 
+//Créer un professeur
 router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
   const { name, email, subject, password, bio } = req.body;
 
+  if (!bio || !subject) {
+    return res.status(400).json({ message: 'Les champs biographie et matière sont obligatoires pour un professeur.' });
+  }
+
   try {
-    // Vérifier si l'utilisateur existe déjà
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'Un utilisateur avec cet email existe déjà.' });
     }
 
-    // Créer un compte Stripe Connect pour le professeur
+    // Créer un compte Stripe Connect
     const stripeAccount = await stripe.accounts.create({
-      type: 'express', // Utilisez Stripe Connect Express
+      type: 'express',
       email: email,
     });
 
@@ -92,30 +96,30 @@ router.post('/createProfessor', [auth, checkAdmin], async (req, res) => {
       return res.status(500).json({ message: 'Erreur lors de la création du compte Stripe.' });
     }
 
-    // Créer un nouvel utilisateur avec le rôle de professeur
+    // Créer un nouvel utilisateur
     user = new User({
       name,
       email,
       subject,
       password,
       bio,
-      role: 'professor', // Spécifier le rôle de professeur
-      stripeAccountId: stripeAccount.id, // Associez l'id Stripe au professeur
+      role: 'professor',
+      stripeAccountId: stripeAccount.id,
     });
 
-    // Hashage du mot de passe avant de sauvegarder
+    // Hashage du mot de passe
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
 
-    // Sauvegarder l'utilisateur dans la base de données
     await user.save();
 
-    res.status(201).json({ message: 'Professor created successfully', user });
+    res.status(201).json({ message: 'Professeur créé avec succès', user });
   } catch (err) {
     console.error('Erreur lors de la création du professeur :', err.message);
     res.status(500).json({ message: 'Erreur lors de la création du professeur' });
   }
 });
+
 
 
 // Route pour récupérer tous les utilisateurs avec le rôle "professor"
