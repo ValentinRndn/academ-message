@@ -19,7 +19,7 @@
       <div
         v-for="conversation in sortedConversations"
         :key="conversation?._id"
-        class="conversation-item p-3 mb-3 rounded-lg cursor-pointer back hover:bg-gray-700 transition"
+        class="conversation-item p-3 mb-3 rounded-lg cursor-pointer back hover:bg-darkblue transition"
         :class="{ 'bg-gray-700': selectedConversationId === conversation._id }"
         @click="selectConversation(conversation._id)"
       >
