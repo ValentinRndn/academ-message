@@ -3,8 +3,6 @@
     <Navbar></Navbar>
     <!-- Afficher le dashboard approprié en fonction du rôle de l'utilisateur -->
     <adminDashboard v-if="userRole === 'admin'"></adminDashboard>
-    <clientDashboard v-if="userRole === 'client'"></clientDashboard>
-    <professorDashboard v-if="userRole === 'professor'"></professorDashboard>
     <p v-if="!userRole">Aucun rôle défini ou utilisateur non authentifié.</p>
   </div>
 </template>

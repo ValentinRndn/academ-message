@@ -17,7 +17,7 @@
             class="hover:text-purple-400 transition"
             :class="{ 'underline decoration-2 decoration-purple-500': $route.path === '/adminPage' }"
           >
-            Accueil
+            Admin
           </router-link>
           <router-link 
             to="/" 
@@ -171,11 +171,13 @@ export default {
       isMobileMenuOpen: false,
       isProfileMenuOpen: false, // État pour gérer l'ouverture/fermeture du menu profil
       isAuthenticated: false, // État pour vérifier si l'utilisateur est connecté
-      userProfilePicture: '' // URL de la photo de profil
+      userProfilePicture: '', // URL de la photo de profil
+      userRole: '', // Rôle de l'utilisateur
     };
   },
   mounted() {
     this.checkAuthStatus();
+    this.setUserRole(); // Appelle la méthode pour définir le rôle
   },
   methods: {
     // Méthode pour vérifier si l'utilisateur est authentifié
@@ -185,18 +187,40 @@ export default {
         this.isAuthenticated = true;
 
         // Faire une requête pour obtenir le profil utilisateur
-        axios.get('http://localhost:5000/api/users/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        })
-        .then((response) => {
-          this.userProfilePicture = `http://localhost:5000/uploads/${response.data.profilePicture}`;
-        })
-        .catch((error) => {
-          console.error('Erreur lors de la récupération des informations du profil:', error);
-          this.userProfilePicture = 'default-profile-pic-url.jpg'; // Image par défaut si erreur
-        });
+        axios
+          .get('http://localhost:5000/api/users/profile', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .then((response) => {
+            this.userProfilePicture = `http://localhost:5000/uploads/${response.data.profilePicture}`;
+          })
+          .catch((error) => {
+            console.error('Erreur lors de la récupération des informations du profil:', error);
+            this.userProfilePicture = 'default-profile-pic-url.jpg'; // Image par défaut si erreur
+          });
+      }
+    },
+    // Méthode pour définir le rôle de l'utilisateur
+    setUserRole() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decodedToken = this.decodeJwt(token); // Décoder le token
+        this.userRole = decodedToken?.user?.role || '';
+      } else {
+        console.warn('Token non trouvé ou utilisateur non authentifié.');
+      }
+    },
+    // Décoder le token JWT
+    decodeJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(base64));
+      } catch (error) {
+        console.error('Erreur lors du décodage du token JWT:', error);
+        return null;
       }
     },
     toggleProfileMenu() {
@@ -214,10 +238,11 @@ export default {
       this.isAuthenticated = false;
       this.isProfileMenuOpen = false;
       this.$router.push({ name: 'auth' }); // Redirige vers la page de connexion après déconnexion
-    }
-  }
+    },
+  },
 };
 </script>
+
 
 <style scoped>
 .profil-container {

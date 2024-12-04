@@ -34,6 +34,7 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/authRoute'));
 app.use('/api/users', require('./routes/userRoute')); 
 app.use('/api/conversations', require('./routes/conversationRoute')); 
+app.use('/api/statistics', require('./routes/statisticsRoute'));
 app.use('/uploads', express.static('uploads'));
 app.use('/api/booking', require('./routes/bookingRoutes')); 
 app.use('/public', express.static('public'));
