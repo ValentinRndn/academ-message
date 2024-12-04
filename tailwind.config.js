@@ -14,6 +14,7 @@ module.exports = {
         'bordergray': 'rgba(255, 255, 255, 0.2)',
         'backgray': '#171717',
         'purewhite': '#424242',
+        'darkblue': "#353568",
 
       },
       fontFamily: {

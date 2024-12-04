@@ -1,6 +1,6 @@
 <template>
   <navbar />
-  <div class="back min-h-screen">
+  <div class="min-h-screen">
     <!-- Affichage des détails du professeur -->
     <div
       v-if="professor"

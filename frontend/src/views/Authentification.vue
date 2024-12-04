@@ -1,6 +1,7 @@
 <template>
     <div class="auth-container flex justify-center items-center min-h-[100vh]  text-gray-800">
       <div class="auth-card p-4 rounded-lg w-full max-w-[400px] text-center  ">
+        <img class="w-1/5 mb-8 mx-auto" src="../assets/logo_academ.png" alt="Logo">
         <h2 class="mb-2 text-2xl font-semibold">{{ isLogin ? 'CONNEXION' : 'INSCRIPTION' }}</h2>
   
         <form @submit.prevent="isLogin ? login() : register()">

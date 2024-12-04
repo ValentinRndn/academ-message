@@ -5,7 +5,7 @@
         <!-- Logo -->
         <div class="flex-shrink-0 flex items-center">
           <router-link to="/" class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-            Academ-Message
+            <img src="../assets/logo_academ.png" alt="Logo" class="w-[40px]">
           </router-link>
         </div>
 
@@ -59,7 +59,7 @@
               <!-- Dropdown Menu -->
               <div
                 v-if="isProfileMenuOpen"
-                class="absolute right-0 mt-40 w-48 back border border-gray-700 rounded-lg shadow-lg z-20"
+                class="dropdown-menu bg-darkblue absolute right-0 mt-40 w-48  border  rounded-lg shadow-lg z-20"
               >
                 <ul class="py-2 text-sm text-gray-200">
                   <li>
@@ -233,6 +233,11 @@ export default {
 
 .navbar {
   background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
+
+}
+
+.dropdown-menu {
+  border: 1px solid rgba(255, 255, 255, 0.2);
 
 }
 </style>

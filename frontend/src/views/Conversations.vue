@@ -1,8 +1,8 @@
 <template>
   <Navbar />
-  <div class="messenger-layout h-full flex text-white overflow-y-hidden m-4 gap-4 md:flex-col">
+  <div class="messenger-layout h-full flex text-white overflow-y-hidden mt-4 mx-4 gap-4 md:flex-col">
     <!-- Liste des conversations (gauche) -->
-    <div class="conversations-list w-1/4  p-4 rounded-lg h-[89.5vh]  shadow-lg">
+    <div class="conversations-list w-1/4  p-4 rounded-lg h-[89.5vh]  shadow-lg md:w-full md:h-fit md:max-h-[50vh] overflow-y-auto">
       <div class="top-conversations-list-container flex items-center justify-between h-fit mb-4">
         <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
           Conversations
@@ -40,8 +40,8 @@
     </div>
 
     <!-- Zone de la conversation sélectionnée (droite) -->
-    <div class="conversation-detail w-3/4 rounded-lg h-[89.5vh] shadow-lg flex flex-col">
-      <div v-if="selectedConversation" class="flex items-center gap-3 p-4 border-b border-gray-700">
+    <div class="conversation-detail w-3/4 rounded-lg relative h-[89.5vh] shadow-lg flex flex-col md:w-full">
+      <div v-if="selectedConversation" class="top-conversation-detail flex sticky top-0 items-center gap-3 p-4 border-b border-gray-700">
         <img
           :src="getOtherParticipant(selectedConversation?.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(selectedConversation?.participants).profilePicture}` : '../../assets/profil/default.webp'"
           alt="Profile"
@@ -60,7 +60,7 @@
       </div>
 
       <div v-if="selectedConversation" class="flex-1 flex flex-col h-full">
-        <div ref="messagesContainer" class="messages-container flex-1 overflow-y-auto p-4 space-y-4">
+        <div ref="messagesContainer" class="messages-container flex-1 p-4 space-y-4">
           <div
             v-for="message in selectedConversation?.messages"
             :key="message._id"
@@ -87,12 +87,12 @@
         <div v-if="isTyping && selectedConversationId" class="typing-indicator text-gray-400 italic">
         L'autre utilisateur est en train d'écrire...
       </div>
-        <div class="message-input flex items-center gap-4 p-4">
+        <div class="message-input flex items-center gap-4 p-4 ">
           <input
             v-model="newMessage"
             type="text"
             placeholder="Aa"
-            class="flex-1 back text-white p-3 rounded-lg focus:ring-2 focus:ring-purple-500"
+            class="flex-1 back text-white p-3 rounded-lg focus:ring-2 focus:ring-purple-500 mb-0"
             @input="notifyTyping"
             @blur="stopTyping"
           />
@@ -468,7 +468,7 @@ watch([selectedConversationId, conversations], () => {
 .conversation-item {
   transition: background-color 0.2s;
 }
-.messages-container {
+.conversation-detail  {
   flex-grow: 1;
   overflow-y: auto;
 }
@@ -502,11 +502,6 @@ img {
   flex-direction: column;
 }
 
-.messages-container {
-  flex: 1; /* Prend tout l'espace disponible */
-  overflow-y: auto; /* Ajoute une barre de défilement si nécessaire */
-  padding: 1rem;
-}
 
 .message-input {
   position: sticky;
@@ -515,6 +510,10 @@ img {
   padding: 1rem;
   z-index: 10; /* Assure que la barre reste au-dessus */
   border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.top-conversation-detail, .custom-select {
+  background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
 }
 
 </style>

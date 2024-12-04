@@ -1,5 +1,5 @@
 <template>
-  <div class="app font-quicksand  overflow-y-hidden">
+  <div class="app min-h-screen font-quicksand overflow-y-hidden md:overflow-y-auto">
 
 
     <router-view />

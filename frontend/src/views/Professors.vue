@@ -1,7 +1,7 @@
 <template>
   <Navbar></Navbar>
 
-  <div class="professors-container p-8  m-4 rounded-lg h-[89.5vh] border-3 border-darkgray">
+  <div class="professors-container p-8  m-4 rounded-lg min-h-screen border-3 border-darkgray">
     <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent mb-8">Trouvez votre professeur</h1>
 
     <!-- Barre de recherche -->
