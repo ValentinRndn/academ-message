@@ -163,7 +163,7 @@
 
 
         <!-- Stripe Elements pour la saisie des informations bancaires -->
-        <label class="block mb-2">Coordonnées bancaires:</label>
+        <label class="block mb-2 text-white">Coordonnées bancaires:</label>
         <div id="card-element" class="text-white mb-4 "></div>
         
         <div class="flex justify-end space-x-4">
