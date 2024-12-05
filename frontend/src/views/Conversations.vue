@@ -85,7 +85,7 @@
             </p>
           </div>
         </div>
-        <div v-if="isTyping && selectedConversationId" class="typing-indicator text-gray-400 italic">
+        <div v-if="isTyping && selectedConversationId" class="typing-indicator text-gray-400 italic ml-5">
         L'autre utilisateur est en train d'écrire...
       </div>
         <div class="message-input flex items-center gap-4 p-4 ">
@@ -383,6 +383,7 @@ const confirmBooking = async () => {
     const response = await axios.post('http://localhost:5000/api/booking/schedule-payment', payload);
 
     alert(response.data.message);
+    closeBookingModal();
   } catch (error) {
     console.error('Erreur lors de la réservation :', error.response?.data || error.message);
     alert('Erreur lors de la réservation. Consultez la console pour plus de détails.');
