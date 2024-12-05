@@ -384,7 +384,7 @@ const confirmBooking = async () => {
     };
 
 
-    const response = await axios.post('${apiUrl}/api/booking/schedule-payment', payload);
+    const response = await axios.post(`${apiUrl}/api/booking/schedule-payment`, payload);
 
     alert(response.data.message);
     closeBookingModal();

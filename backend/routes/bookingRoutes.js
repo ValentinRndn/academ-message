@@ -1,8 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const schedule = require('node-schedule');
-const stripe = require('stripe')('sk_test_51LmhGsHQanXHoJn0RTN8E60pZA6VlweUCRsEKA5o0Xwnucm1UKCNRJGwUYgXXcPajVgfjRp3GgUIme0HbeSGZkR300dtVCPlyy'); 
-const Appointment = require('../models/Appointment'); // Modèle de rendez-vous
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Appointment = require('../models/Appointment');
 
 const router = express.Router();
 
