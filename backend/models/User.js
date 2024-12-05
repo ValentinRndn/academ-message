@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: '/public/images/default-profile.webp',
+    default: '../public/images/default-profile.webp',
   },
   role: {
     type: String,

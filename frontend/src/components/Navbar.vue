@@ -35,7 +35,7 @@
             Professeurs
           </router-link>
         </div>
-
+ 
         <!-- Auth/Profil Section -->
         <div class="flex md:hidden items-center space-x-4">
           <template v-if="isAuthenticated">

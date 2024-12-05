@@ -7,7 +7,8 @@
         <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
           Conversations
         </h1>
-        <router-link to="professors">
+        <router-link v-if="userRole != 'professor'" to="professors" >
+          
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" class="cursor-pointer text-gray-300 hover:text-purple-500 transition" viewBox="0 0 21 21">
             <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
               <path d="M10 4.5H5.5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V11" />
