@@ -105,6 +105,7 @@
 <script>
 import axios from "axios";
 
+const apiUrl = import.meta.env.VITE_API_URL;
 export default {
   name: "AdminDashboard",
   data() {
@@ -130,13 +131,13 @@ export default {
 
         // Appeler les API pour obtenir les statistiques
         const [appointmentsResponse, usersResponse, conversationsResponse] = await Promise.all([
-          axios.get("http://localhost:5000/api/statistics/appointments", {
+          axios.get(`${apiUrl}/api/statistics/appointments`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5000/api/statistics/users", {
+          axios.get(`${apiUrl}/api/statistics/users`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5000/api/statistics/conversations", {
+          axios.get(`${apiUrl}/api/statistics/conversations`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -160,7 +161,7 @@ export default {
 
         // Envoi de la requête pour créer un professeur
         const response = await axios.post(
-          "http://localhost:5000/api/users/createProfessor",
+          `${apiUrl}/api/users/createProfessor`,
           {
             name: this.name,
             email: this.email,

@@ -28,7 +28,7 @@
 
         <div class="flex items-center gap-3">
           <img
-            :src="getOtherParticipant(conversation?.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(conversation.participants).profilePicture}` : '../../assets/profil/default.webp'"
+            :src="getOtherParticipant(conversation?.participants)?.profilePicture ? `${apiUrl}/uploads/${getOtherParticipant(conversation.participants).profilePicture}` : '../../assets/profil/default.webp'"
             alt="Profile"
             class="w-10 h-10 rounded-full border border-gray-600"
           />
@@ -44,7 +44,7 @@
     <div class="conversation-detail w-3/4 rounded-lg relative h-[89.5vh] shadow-lg flex flex-col md:w-full">
       <div v-if="selectedConversation" class="top-conversation-detail flex sticky top-0 items-center gap-3 p-4 border-b border-gray-700">
         <img
-          :src="getOtherParticipant(selectedConversation?.participants)?.profilePicture ? `http://localhost:5000/uploads/${getOtherParticipant(selectedConversation?.participants).profilePicture}` : '../../assets/profil/default.webp'"
+          :src="getOtherParticipant(selectedConversation?.participants)?.profilePicture ? `${apiUrl}/uploads/${getOtherParticipant(selectedConversation?.participants).profilePicture}` : '../../assets/profil/default.webp'"
           alt="Profile"
           class="w-12 h-12 rounded-full border border-gray-600"
         />
@@ -70,7 +70,7 @@
           >
             <img
               v-if="message.sender?._id !== userId"
-              :src="message.sender?.profilePicture ? `http://localhost:5000/uploads/${message.sender?.profilePicture}` : '../../assets/profil/default.webp'"
+              :src="message.sender?.profilePicture ? `${apiUrl}/uploads/${message.sender?.profilePicture}` : '../../assets/profil/default.webp'"
               alt="Profile"
               class="w-8 h-8 rounded-full border border-gray-600"
             />
@@ -186,8 +186,12 @@ import axios from 'axios';
 import Navbar from '../components/Navbar.vue';
 import { decodeJwt } from '../services/decodeJwt'; 
 
-const socket = io('http://localhost:5000');
-const stripePromise = loadStripe('pk_test_51LmhGsHQanXHoJn0wBK5v2yQyHFdQ4KlSXSXZobDhxFPCrhVwWtCwWXvNIxjOQdi65riR24NEgQyY6Ck1UZkPqq800jtbOgNU8');
+const apiUrl = import.meta.env.VITE_API_URL;
+const stripePublicKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+
+
+const socket = io(apiUrl);
+const stripePromise = loadStripe(stripePublicKey);
 let clientSecret = null;
 let elements;
 const isTyping = ref(false);
@@ -237,7 +241,7 @@ const loadConversations = async () => {
   userRole.value = decodedToken.user.role;
 
   try {
-    const response = await axios.get(`http://localhost:5000/api/conversations/${userId}`);
+    const response = await axios.get(`${apiUrl}/api/conversations/${userId}`);
     console.log('Conversations récupérées :', response.data);
 
     conversations.value = response.data.map(conversation => {
@@ -305,12 +309,12 @@ const sendMessage = async () => {
 
   isSendingMessage = true;
   const messageText = newMessage.value.trim();
-  newMessage.value = ''; // Réinitialiser le champ d'entrée
+  newMessage.value = '';
 
   try {
     // Envoyer le message à l'API
     const response = await axios.post(
-      `http://localhost:5000/api/conversations/${selectedConversationId.value}/message`,
+      `${apiUrl}/api/conversations/${selectedConversationId.value}/message`,
       { senderId: userId, text: messageText }
     );
 
@@ -376,11 +380,11 @@ const confirmBooking = async () => {
       bookingTime: bookingTime.value,
       amount: Math.round(totalAmount.value * 100),
       currency: 'eur',
-      professorStripeAccountId: professorStripeAccountId.value, // Utilisez `.value`
+      professorStripeAccountId: professorStripeAccountId.value, 
     };
 
 
-    const response = await axios.post('http://localhost:5000/api/booking/schedule-payment', payload);
+    const response = await axios.post('${apiUrl}/api/booking/schedule-payment', payload);
 
     alert(response.data.message);
     closeBookingModal();
@@ -510,7 +514,7 @@ img {
   bottom: 0;
   background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
   padding: 1rem;
-  z-index: 10; /* Assure que la barre reste au-dessus */
+  z-index: 10; 
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 

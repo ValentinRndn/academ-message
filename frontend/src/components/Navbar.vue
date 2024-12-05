@@ -166,6 +166,8 @@
 <script>
 import axios from 'axios';
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export default {
   data() {
     return {
@@ -189,7 +191,7 @@ export default {
 
         // Faire une requête pour obtenir le profil utilisateur
         axios
-          .get('http://localhost:5000/api/users/profile', {
+          .get(`${apiUrl}/api/users/profile`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },

@@ -39,6 +39,8 @@
   
   <script>
   import axios from 'axios';
+
+const apiUrl = import.meta.env.VITE_API_URL;
   
   export default {
     data() {
@@ -47,13 +49,13 @@
         password: '',
         confirmPassword: '',
         error: '',
-        isLogin: true, // Permet de basculer entre Connexion et Inscription
+        isLogin: true, 
       };
     },
     methods: {
       async login() {
         try {
-          const response = await axios.post('http://localhost:5000/api/auth/login', {
+          const response = await axios.post(`${apiUrl}/api/auth/login`, {
             email: this.email,
             password: this.password
           });
@@ -75,14 +77,14 @@
         }
   
         try {
-          const response = await axios.post('http://localhost:5000/api/auth/register', {
+          const response = await axios.post(`${apiUrl}/api/auth/register`, {
             email: this.email,
             password: this.password
           });
   
           // Rediriger après l'inscription réussie
-          this.isLogin = true; // Retourner à la page de connexion
-          this.error = ''; // Réinitialiser les erreurs
+          this.isLogin = true; 
+          this.error = ''; 
         } catch (err) {
           this.error = "Erreur lors de l'inscription. Veuillez réessayer.";
         }

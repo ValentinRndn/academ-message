@@ -23,7 +23,7 @@
       >
         <div class="flex items-center gap-3">
           <img
-            :src="professor.profilePicture ? `http://localhost:5000/uploads/${professor.profilePicture}` : '../assets/profil/default.webp'"
+            :src="professor.profilePicture ? `${apiUrl}/uploads/${professor.profilePicture}` : '../assets/profil/default.webp'"
             alt="ProfileProfessor"
             class="w-10 h-10 rounded-full border border-gray-300"
           />
@@ -60,6 +60,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Navbar from '../components/Navbar.vue';
 import { fetchProfessors } from '../services/professorServices';
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const professors = ref([]);
 const searchQuery = ref('');
@@ -164,7 +166,5 @@ input::placeholder {
   background: linear-gradient(135deg, #8e44ad, #d441ff);
   transform: translateY(-3px);
 }
-
-/* Message d'erreur */
 
 </style>

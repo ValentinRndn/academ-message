@@ -11,16 +11,14 @@
 import { ref, onMounted } from 'vue';
 import Navbar from '../components/Navbar.vue';
 import adminDashboard from '../components/dashboard/adminDashboard.vue';
-import clientDashboard from '../components/dashboard/clientDashboard.vue';
-import professorDashboard from '../components/dashboard/professorDashboard.vue';
-import { getUserRoleFromToken } from '../services/decodeJwt.js'; // Importer la fonction getUserRoleFromToken
+import { getUserRoleFromToken } from '../services/decodeJwt.js'; 
 
 // Déclaration de la variable réactive pour stocker le rôle
 const userRole = ref('');
 
 // Appeler la fonction pour récupérer le rôle lors du montage du composant
 onMounted(() => {
-  const role = getUserRoleFromToken(); // Appeler la méthode pour obtenir le rôle
+  const role = getUserRoleFromToken(); 
   if (role) {
     userRole.value = role;
   } else {

@@ -72,10 +72,11 @@ const professorId = route.params.id; // ID du professeur à partir de l'URL
 // Stocker les détails du professeur
 const professor = ref(null);
 
+const apiUrl = import.meta.env.VITE_API_URL;
 // Appeler l'API pour obtenir les détails du professeur
 onMounted(async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/users/${professorId}`);
+    const response = await axios.get(`${apiUrl}/api/users/${professorId}`);
     console.log('Données du professeur récupérées :', response.data); 
     professor.value = response.data;
   } catch (error) {
@@ -103,8 +104,8 @@ const createConversation = async (professorId) => {
   console.log('Professor ID:', professorId); 
 
   try {
-    const response = await axios.post('http://localhost:5000/api/conversations', {
-      participants: [userId, professorId], // Les deux ID doivent être différents
+    const response = await axios.post(`${apiUrl}/api/conversations`, {
+      participants: [userId, professorId], 
     });
 
     // Rediriger vers la page de la conversation créée
@@ -118,7 +119,6 @@ const createConversation = async (professorId) => {
 </script>
   
   <style scoped>
-  /* Styles simples pour les détails du professeur */
   .professor-detail {
     max-width: 600px;
     margin: 0 auto;

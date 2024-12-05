@@ -104,6 +104,8 @@
   import axios from 'axios';
   import Navbar from '../components/Navbar.vue';
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   const formData = ref({
     name: '',
     email: '',
@@ -131,7 +133,7 @@
   onMounted(async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get('http://localhost:5000/api/users/profile', {
+    const response = await axios.get(`${apiUrl}/api/users/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -141,7 +143,7 @@
       formData.value.idstripe = response.data.stripeAccountId || '';
       formData.value.role = response.data.role || ''; // Initialiser le rôle
       profilePictureUrl.value = response.data.profilePicture
-        ? `http://localhost:5000/uploads/${response.data.profilePicture}`
+        ? `${apiUrl}/uploads/${response.data.profilePicture}`
         : 'default-profile.png'; // Placeholder si aucune photo n'est disponible
     } else {
       console.error('Aucune donnée utilisateur reçue.');
@@ -167,7 +169,7 @@
   try {
     const token = localStorage.getItem('token');
     const response = await axios.post(
-      'http://localhost:5000/api/users/updateProfile',
+      `${apiUrl}/api/users/updateProfile`,
       formDataToSend,
       {
         headers: {
