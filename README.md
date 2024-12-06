@@ -83,7 +83,7 @@ Académ est une application web permettant des interactions en temps réel entre
    Backend .env
    ```bash
    PORT=5000
-   MONGO_URI=<liendelabase
+   MONGO_URI=<liendelabase>
    JWT_SECRET=your_jwt_secret
    STRIPE_SECRET_KEY=sk__clé_stripe
    ```
@@ -119,6 +119,7 @@ Académ est une application web permettant des interactions en temps réel entre
    Le paiement est géré via Stripe.
 
 ## **Structure du projet**
+   ```bash
 /academ
 ├── /backend
 │   ├── controllers/
@@ -135,6 +136,7 @@ Académ est une application web permettant des interactions en temps réel entre
 │   │   └── App.vue
 │   └── .env
 └── README.md
+```
 
 ## **Contributeurs**
 Valentin Renaudin- Développeur principal
