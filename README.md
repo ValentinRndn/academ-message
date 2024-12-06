@@ -57,3 +57,85 @@ Académ est une application web permettant des interactions en temps réel entre
    ```bash
    git clone https://github.com/votre-repo/academ.git
    cd academ
+   ```
+2. Installez les dépendances pour le backend :
+   ```bash
+   cd backend
+   npm install
+   ```
+2. Installez les dépendances pour le frontend : 
+   ```bash
+   cd ../frontend
+   npm install
+   ```
+
+## **Configuration**
+
+1. Créez un fichier .env dans les dossiers frontend et backend avec les variables suivantes :
+
+   Frontend .env
+   ```bash
+   VITE_API_URL=<urlAPI>
+   VITE_STRIPE_PUBLIC_KEY=pk_clé_stripe
+   ```
+
+1. Créez un fichier .env dans les dossiers frontend et backend avec les variables suivantes :
+   Backend .env
+   ```bash
+   PORT=5000
+   MONGO_URI=<liendelabase
+   JWT_SECRET=your_jwt_secret
+   STRIPE_SECRET_KEY=sk__clé_stripe
+   ```
+
+## **Lancement de l'application**
+
+1. Démarrez le serveur backend 
+   Backend
+   ```bash
+   cd backend
+   node server
+   ```
+
+2. Démarrez le serveur frontend 
+   Frontend
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+## **Fonctionnement**
+
+1. Authentification :
+   Les utilisateurs se connectent avec leur email et mot de passe.
+   Les tokens JWT sécurisent les requêtes.
+
+2. Messagerie :
+   Les messages sont transmis en temps réel grâce à Socket.IO.
+   Les messages sont sauvegardés dans MongoDB.
+   
+3. Réservation :
+   Les étudiants choisissent une date/heure parmi les créneaux disponibles des professeurs.
+   Le paiement est géré via Stripe.
+
+## **Structure du projet**
+/academ
+├── /backend
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── server.js
+│   └── .env
+├── /frontend
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── App.vue
+│   └── .env
+└── README.md
+
+## **Contributeurs**
+Valentin Renaudin- Développeur principal
+Contributions, questions ou suggestions ? Contactez-moi sur [Lien](https://valentin-renaudin.com/ "Mon site").
