@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar text-white mb-4 shadow-lg ">
+  <nav class="navbar text-white mb-4 shadow-lg">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
@@ -27,7 +27,7 @@
             Conversations
           </router-link>
           <router-link 
-          v-if="userRole != 'professor'" 
+            v-if="userRole !== 'professor'" 
             to="/professors" 
             class="hover:text-purple-400 transition"
             :class="{ 'underline decoration-2 decoration-purple-500': $route.path === '/professors' }"
@@ -35,9 +35,9 @@
             Professeurs
           </router-link>
         </div>
- 
+
         <!-- Auth/Profil Section -->
-        <div class="flex md:hidden items-center space-x-4">
+        <div class=" md:hidden items-center space-x-4">
           <template v-if="isAuthenticated">
             <div class="relative profil-container flex items-center">
               <img
@@ -60,15 +60,23 @@
               <!-- Dropdown Menu -->
               <div
                 v-if="isProfileMenuOpen"
-                class="dropdown-menu bg-darkblue absolute right-0 mt-40 w-48  border  rounded-lg shadow-lg z-20"
+                class="dropdown-menu bg-darkblue absolute right-0 mt-12 w-48 border rounded-lg shadow-lg z-20"
               >
                 <ul class="py-2 text-sm text-gray-200">
                   <li>
                     <router-link 
-                      to="profileParameter" 
+                      to="/profileParameter" 
                       class="block px-4 py-2 hover:bg-gray-800 rounded-lg transition"
                     >
-                      Paramètre profil
+                      Mon Profil
+                    </router-link>
+                  </li>
+                  <li v-if="userRole === 'admin'">
+                    <router-link 
+                      to="/adminPage" 
+                      class="block px-4 py-2 hover:bg-gray-800 rounded-lg transition"
+                    >
+                      Admin
                     </router-link>
                   </li>
                   <li>
@@ -119,34 +127,51 @@
     </div>
 
     <!-- Mobile Menu -->
-    <div v-if="isMobileMenuOpen" class="hidden md:flex bg-gray-800 border-t border-gray-700 ">
+    <div v-if="isMobileMenuOpen" class="mobileNavbar  border-t border-gray-700">
       <div class="py-2 space-y-1">
         <router-link 
           to="/" 
-          class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition"
-          :class="{ 'bg-gray-700': $route.path === '/' }"
-        >
-          Accueil
-        </router-link>
-        <router-link 
-          to="/" 
-          class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition"
-          :class="{ 'bg-gray-700': $route.path === '/' }"
+          class="block px-4 py-2 text-gray-300 hover:bg-darkblue rounded-lg transition"
+          :class="{ 'bg-darkblue': $route.path === '/' }"
         >
           Conversations
         </router-link>
         <router-link 
+          v-if="userRole !== 'professor'" 
           to="/professors" 
-          class="block px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-lg transition"
-          :class="{ 'bg-gray-700': $route.path === '/professors' }"
+          class="block px-4 py-2 text-gray-300 hover:bg-darkblue rounded-lg transition"
+          :class="{ 'bg-darkblue': $route.path === '/professors' }"
         >
           Professeurs
         </router-link>
+        <router-link 
+          v-if="userRole === 'admin'" 
+          to="/adminPage" 
+          class="block px-4 py-2 text-gray-300 hover:bg-darkblue rounded-lg transition"
+          :class="{ 'bg-darkblue': $route.path === '/adminPage' }"
+        >
+          Admin
+        </router-link>
+        <router-link 
+          v-if="isAuthenticated" 
+          to="/profileParameter" 
+          class="block px-4 py-2 text-gray-300 hover:bg-darkblue rounded-lg transition"
+        >
+          Mon Profil
+        </router-link>
       </div>
-      <div class="py-3 border-t border-gray-700">
+      <div v-if="isAuthenticated" class="py-3 border-t border-gray-700">
+        <button 
+          @click="logout" 
+          class="block w-full text-left px-4 py-2 text-gray-300 hover:bg-darkblue transition"
+        >
+          Se déconnecter
+        </button>
+      </div>
+      <div v-else class="py-3 border-t border-gray-700">
         <button 
           @click="goToLogin" 
-          class="block w-full text-left px-4 py-2 text-gray-300 hover:bg-gray-700 transition"
+          class="block w-full text-left px-4 py-2 text-gray-300 hover:bg-darkblue transition"
         >
           Se connecter
         </button>
@@ -161,8 +186,6 @@
   </nav>
 </template>
 
-
-
 <script>
 import axios from 'axios';
 
@@ -172,24 +195,21 @@ export default {
   data() {
     return {
       isMobileMenuOpen: false,
-      isProfileMenuOpen: false, // État pour gérer l'ouverture/fermeture du menu profil
-      isAuthenticated: false, // État pour vérifier si l'utilisateur est connecté
-      userProfilePicture: '', // URL de la photo de profil
-      userRole: '', // Rôle de l'utilisateur
+      isProfileMenuOpen: false,
+      isAuthenticated: false,
+      userProfilePicture: '',
+      userRole: '',
     };
   },
   mounted() {
     this.checkAuthStatus();
-    this.setUserRole(); // Appelle la méthode pour définir le rôle
+    this.setUserRole();
   },
   methods: {
-    // Méthode pour vérifier si l'utilisateur est authentifié
     checkAuthStatus() {
       const token = localStorage.getItem('token');
       if (token) {
         this.isAuthenticated = true;
-
-        // Faire une requête pour obtenir le profil utilisateur
         axios
           .get(`${apiUrl}/api/users/profile`, {
             headers: {
@@ -197,32 +217,26 @@ export default {
             },
           })
           .then((response) => {
-            this.userProfilePicture = `http://localhost:5000/uploads/${response.data.profilePicture}`;
+            this.userProfilePicture = `${apiUrl}/uploads/${response.data.profilePicture}`;
           })
-          .catch((error) => {
-            console.error('Erreur lors de la récupération des informations du profil:', error);
-            this.userProfilePicture = 'default-profile-pic-url.jpg'; // Image par défaut si erreur
+          .catch(() => {
+            this.userProfilePicture = 'default-profile-pic-url.jpg';
           });
       }
     },
-    // Méthode pour définir le rôle de l'utilisateur
     setUserRole() {
       const token = localStorage.getItem('token');
       if (token) {
-        const decodedToken = this.decodeJwt(token); // Décoder le token
+        const decodedToken = this.decodeJwt(token);
         this.userRole = decodedToken?.user?.role || '';
-      } else {
-        console.warn('Token non trouvé ou utilisateur non authentifié.');
       }
     },
-    // Décoder le token JWT
     decodeJwt(token) {
       try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         return JSON.parse(atob(base64));
-      } catch (error) {
-        console.error('Erreur lors du décodage du token JWT:', error);
+      } catch {
         return null;
       }
     },
@@ -236,36 +250,25 @@ export default {
       this.$router.push({ name: 'signup' });
     },
     logout() {
-      // Supprimer le token et déconnecter l'utilisateur
       localStorage.removeItem('token');
       this.isAuthenticated = false;
       this.isProfileMenuOpen = false;
-      this.$router.push({ name: 'auth' }); // Redirige vers la page de connexion après déconnexion
+      this.$router.push({ name: 'auth' });
     },
   },
 };
 </script>
-
 
 <style scoped>
 .profil-container {
   position: relative;
 }
 
-.active-link {
-  text-decoration: underline;
-  text-underline-offset: 4px; 
-  text-decoration-thickness: 2px; 
-  color: rgba(217,167,228,1);
-}
-
-.navbar {
+.navbar, .mobileNavbar {
   background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
-
 }
 
 .dropdown-menu {
   border: 1px solid rgba(255, 255, 255, 0.2);
-
 }
 </style>

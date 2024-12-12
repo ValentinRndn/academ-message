@@ -242,7 +242,6 @@ const loadConversations = async () => {
 
   try {
     const response = await axios.get(`${apiUrl}/api/conversations/${userId}`);
-    console.log('Conversations récupérées :', response.data);
 
     conversations.value = response.data.map(conversation => {
       if (conversation.messages) {
@@ -287,7 +286,6 @@ const selectConversation = (conversationId) => {
       // Définir le professeur sélectionné et récupérer l'id Stripe
       selectedProfessor.value = otherParticipant;
       professorStripeAccountId.value = otherParticipant.stripeAccountId; 
-      console.log('ID Stripe du professeur sélectionné :', professorStripeAccountId.value);
     }
   }
 
@@ -305,7 +303,6 @@ const sendMessage = async () => {
     return;
   }
 
-  console.log('Message prêt à être envoyé :', { text: newMessage.value.trim(), senderId: userId });
 
   isSendingMessage = true;
   const messageText = newMessage.value.trim();
@@ -368,7 +365,6 @@ const openBookingModal = async () => {
 
 const confirmBooking = async () => {
   try {
-    console.log('Valeur actuelle de totalAmount :', totalAmount.value);
 
     if (!totalAmount.value || isNaN(totalAmount.value) || totalAmount.value <= 0) {
       alert('Veuillez entrer un montant valide.');

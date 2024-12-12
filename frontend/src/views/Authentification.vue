@@ -7,18 +7,23 @@
         <form @submit.prevent="isLogin ? login() : register()">
           <div class="form-group">
             <label class="label-form text-gray-600">Email:</label>
-            <input type="email" v-model="email" class="bg-transparent" placeholder="Entrer votre email" required />
+            <input type="email" v-model="email" class="bg-transparent" placeholder="Entrez votre email" required />
+          </div>
+
+          <div class="form-group">
+            <label class="label-form text-gray-600">Pseudo:</label>
+            <input type="text" v-model="name" class="bg-transparent" placeholder="Entrez votre pseudo" required />
           </div>
   
           <div class="form-group">
             <label class="label-form text-gray-600">Mot de passe:</label>
-            <input type="password" v-model="password" class="bg-transparent" placeholder="Entrer votre mot de passe" required />
+            <input type="password" v-model="password" class="bg-transparent" placeholder="Entrez votre mot de passe" required />
           </div>
   
           <!-- Champ supplémentaire pour l'inscription -->
           <div v-if="!isLogin" class="form-group">
             <label class="label-form ">Confirmer le mot de passe:</label>
-            <input type="password" v-model="confirmPassword" class="bg-transparent" placeholder="Confirmer votre mot de passe" required />
+            <input type="password" v-model="confirmPassword" class="bg-transparent" placeholder="Confirmez votre mot de passe" required />
           </div>
   
           <button type="submit" class="auth-button bg-purplee hover:bg-bluee text-white font-semibold p-2 w-full border-none rounded-lg cursor-pointer">
@@ -46,6 +51,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
     data() {
       return {
         email: '',
+        name: '',
         password: '',
         confirmPassword: '',
         error: '',
@@ -57,9 +63,9 @@ const apiUrl = import.meta.env.VITE_API_URL;
         try {
           const response = await axios.post(`${apiUrl}/api/auth/login`, {
             email: this.email,
+            name: this.name,
             password: this.password
           });
-          console.log('Response from login:', response.data); // Voir si le rôle est bien dans la réponse
 
   
           localStorage.setItem('token', response.data.token);
@@ -79,6 +85,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
         try {
           const response = await axios.post(`${apiUrl}/api/auth/register`, {
             email: this.email,
+            name: this.name,
             password: this.password
           });
   
