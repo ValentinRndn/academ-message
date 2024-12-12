@@ -10,7 +10,7 @@
             <input type="email" v-model="email" class="bg-transparent" placeholder="Entrez votre email" required />
           </div>
 
-          <div class="form-group">
+          <div v-if="!isLogin"  class="form-group">
             <label class="label-form text-gray-600">Pseudo:</label>
             <input type="text" v-model="name" class="bg-transparent" placeholder="Entrez votre pseudo" required />
           </div>
