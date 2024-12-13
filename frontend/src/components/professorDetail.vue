@@ -25,8 +25,8 @@
       <p class="mb-2">
         <strong class="text-purple-500">Matière :</strong> {{ professor.subject }}
       </p>
-      <p class="mb-2">
-        <strong class="text-purple-500">Biographie :</strong> {{ professor.bio }}
+      <p class="mb-2 max-w-[80%]">
+        <strong class="text-purple-500">Biographie : <br></strong> {{ professor.bio }}
       </p>
 
 
