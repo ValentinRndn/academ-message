@@ -4,7 +4,7 @@
     <!-- Affichage des détails du professeur -->
     <div
       v-if="professor"
-      class="professor-detail bg-gray-900 p-8 rounded-lg shadow-lg relative max-w-2xl mx-auto text-white"
+      class="professor-detail bg-gray-900 p-8 rounded-lg shadow-lg relative max-w-2xl mx-auto text-white  pb-16"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -25,9 +25,11 @@
       <p class="mb-2">
         <strong class="text-purple-500">Matière :</strong> {{ professor.subject }}
       </p>
-      <p class="mb-2 max-w-[80%]">
-        <strong class="text-purple-500">Biographie : <br></strong> {{ professor.bio }}
+      <p class="mb-2 w-fit">
+        <strong class="text-purple-500">Biographie : <br></strong>
+        <span class="inline-block max-w-[70%] break-words">{{ professor.bio }}</span>
       </p>
+
 
 
       <button

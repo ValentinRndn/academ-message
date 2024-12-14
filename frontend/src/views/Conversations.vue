@@ -41,7 +41,7 @@
     </div>
 
     <!-- Zone de la conversation sélectionnée (droite) -->
-    <div class="conversation-detail w-3/4 rounded-lg relative h-[89.5vh] shadow-lg flex flex-col md:w-full">
+    <div ref="messagesContainer" class="conversation-detail w-3/4 rounded-lg relative h-[89.5vh] shadow-lg flex flex-col md:w-full">
       <div v-if="selectedConversation" class="top-conversation-detail flex sticky top-0 items-center gap-3 p-4 border-b border-gray-700">
         <img
           :src="getOtherParticipant(selectedConversation?.participants)?.profilePicture ? `${apiUrl}/uploads/${getOtherParticipant(selectedConversation?.participants).profilePicture}` : '../../assets/profil/default.webp'"
@@ -61,7 +61,7 @@
       </div>
 
       <div v-if="selectedConversation" class="flex-1 flex flex-col h-full">
-        <div ref="messagesContainer" class="messages-container flex-1 p-4 space-y-4">
+        <div  class="messages-container flex-1 p-4 space-y-4">
           <div
             v-for="message in selectedConversation?.messages"
             :key="message._id"
@@ -79,14 +79,16 @@
                 'back text-white p-3 rounded-lg': message.sender?._id !== userId,
                 'bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-lg': message.sender?._id === userId
               }"
-              class="max-w-md"
+              class="max-w-md break-words"
             >
               {{ message?.text }}
             </p>
+
           </div>
         </div>
-        <div v-if="isTyping && selectedConversationId" class="typing-indicator text-gray-400 italic ml-5">
-        L'autre utilisateur est en train d'écrire...
+        <div v-if="isTyping && selectedConversationId" class="typing-indicator text-gray-400 italic ml-5 flex items-end">
+        L'autre utilisateur est en train d'écrire
+        <svg xmlns="http://www.w3.org/2000/svg" class="text-gray-400 p  t-1" width="20" height="20" viewBox="0 0 24 24"><circle cx="18" cy="12" r="0" fill="currentColor"><animate attributeName="r" begin=".67" calcMode="spline" dur="1.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" repeatCount="indefinite" values="0;2;0;0"/></circle><circle cx="12" cy="12" r="0" fill="currentColor"><animate attributeName="r" begin=".33" calcMode="spline" dur="1.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" repeatCount="indefinite" values="0;2;0;0"/></circle><circle cx="6" cy="12" r="0" fill="currentColor"><animate attributeName="r" begin="0" calcMode="spline" dur="1.5s" keySplines="0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8;0.2 0.2 0.4 0.8" repeatCount="indefinite" values="0;2;0;0"/></circle></svg>
       </div>
         <div class="message-input flex items-center gap-4 p-4 ">
           <input
@@ -96,6 +98,7 @@
             class="flex-1 back text-white p-3 rounded-lg focus:ring-2 focus:ring-purple-500 mb-0"
             @input="notifyTyping"
             @blur="stopTyping"
+            @keydown.enter="sendMessage"
           />
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -117,36 +120,38 @@
         <p>Sélectionnez une conversation pour commencer à discuter.</p>
       </div>
     </div>
+
+
+    
         <!-- Modale de réservation avec Stripe -->
-        <div v-if="isBookingModalOpen" class="fixed inset-0  flex justify-center items-center z-50">
+        <div v-if="isBookingModalOpen" class="fixed inset-0  backdrop-blur-sm  flex justify-center items-center z-50">
       <div class="modal-container border border-bordergray shadow-xl text-white p-6 rounded-lg w-96">
         <h2 class="text-xl font-bold mb-4">Réserver une session</h2>
         <label class="block mb-2">Date:</label>
         <input type="date" v-model="bookingDate" class="w-full p-2 mb-4 border rounded-md" />
         
         <label class="block mb-2">Heure:</label>
-<div class="custom-select">
-  <!-- Zone pour afficher l'option sélectionnée -->
-  <div class="selected-option  cursor-pointer" @click="toggleDropdown">
-    {{ bookingTime || "Sélectionnez une heure" }}
-  </div>
+        <div class="custom-select">
+          <!-- Zone pour afficher l'option sélectionnée -->
+          <div class="selected-option  cursor-pointer" @click="toggleDropdown">
+            {{ bookingTime || "Sélectionnez une heure" }}
+          </div>
 
-  <!-- Liste des options -->
-  <ul
-    v-if="isDropdownOpen"
-    class="options-list -mt-[1.2rem] bg-darkgray shadow-lg max-h-48 overflow-y-auto "
-  >
-    <li
-      class="option p-2 hover:bg-gray cursor-pointer"
-      v-for="time in availableTimes"
-      :key="time"
-      @click="selectTime(time)"
-    >
-      {{ time }}
-    </li>
-  </ul>
-</div>
-
+          <!-- Liste des options -->
+          <ul
+            v-if="isDropdownOpen"
+            class="options-list -mt-[1.2rem] bg-darkgray shadow-lg max-h-48 overflow-y-auto "
+          >
+            <li
+              class="option p-2 hover:bg-gray cursor-pointer"
+              v-for="time in availableTimes"
+              :key="time"
+              @click="selectTime(time)"
+            >
+              {{ time }}
+            </li>
+          </ul>
+        </div>
 
         <!-- Input pour le montant -->
         <label class="block mb-2">Montant (€):</label>
@@ -158,13 +163,10 @@
           placeholder="Entrer le montant"
         />
 
-
-
-
-
         <!-- Stripe Elements pour la saisie des informations bancaires -->
         <label class="block mb-2 text-white">Coordonnées bancaires:</label>
-        <div id="card-element" class="text-white mb-4 "></div>
+      <div id="card-element" class="text-white mb-4"></div>
+
         
         <div class="flex justify-end space-x-4">
           <button @click="closeBookingModal" class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-900">Annuler</button>
@@ -180,7 +182,7 @@
 
 <script setup>
 import { loadStripe } from '@stripe/stripe-js';
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, onUpdated  } from 'vue';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 import Navbar from '../components/Navbar.vue';
@@ -206,6 +208,23 @@ const totalAmount = ref(0);
 let isSendingMessage = false;
 const professorStripeAccountId = ref('');
 
+// Définir les styles pour l'input de Stripe
+const style = {
+  base: {
+    color: '#ffffff',  // Couleur du texte blanche
+    fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+    fontSize: '16px',
+    '::placeholder': {
+      color: '#d1d1d1',  // Couleur du placeholder (si vous le souhaitez)
+    },
+  },
+  invalid: {
+    color: 'red',
+    iconColor: 'red',
+  },
+};
+
+
 const isDropdownOpen = ref(false);
 const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
@@ -225,12 +244,12 @@ const selectedProfessor = ref(null);
 const messagesContainer = ref(null);
 
 
-function scrollToBottom() {
-  if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+const scrollToBottom = () => {
+  const container = messagesContainer.value;
+  if (container) {
+    container.scrollTop = container.scrollHeight;
   }
-}
-
+};
 
 const loadConversations = async () => {
   const token = localStorage.getItem('token');
@@ -327,6 +346,9 @@ const sendMessage = async () => {
       conversationId: selectedConversationId.value,
       message: newMessage,
     });
+
+    scrollToBottom();
+
   } catch (error) {
     console.error('Erreur lors de l\'envoi du message', error);
   } finally {
@@ -353,7 +375,10 @@ const openBookingModal = async () => {
 
       // Vérifiez si le champ est déjà monté pour éviter les doublons
       if (!document.getElementById('card-element').children.length) {
-        const cardElement = elements.create('card');
+        // Correction ici : utilisez la bonne syntaxe pour créer l'élément card
+        const cardElement = elements.create('card', {
+          style: style
+        });
         cardElement.mount('#card-element');
       }
     }, 100); // Délai pour s'assurer que le DOM est mis à jour
@@ -446,6 +471,10 @@ watch([selectedConversationId, conversations], () => {
   scrollToBottom();
 });
 
+onUpdated(() => {
+  scrollToBottom();
+});
+
 </script>
 
 <style scoped>
@@ -461,6 +490,7 @@ watch([selectedConversationId, conversations], () => {
 }
 
 
+
 .modal-container {
   background: linear-gradient(135deg, #1e1e2f 0%, #302b63 50%, #24243e 100%);
 }
@@ -473,6 +503,7 @@ watch([selectedConversationId, conversations], () => {
 .conversation-detail  {
   flex-grow: 1;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 .message-item {
   display: flex;

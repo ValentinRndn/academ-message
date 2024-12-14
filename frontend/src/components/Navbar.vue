@@ -60,7 +60,7 @@
               <!-- Dropdown Menu -->
               <div
                 v-if="isProfileMenuOpen"
-                class="dropdown-menu bg-darkblue absolute right-0 mt-12 w-48 border rounded-lg shadow-lg z-20"
+                class="dropdown-menu bg-darkblue absolute right-0 mt-36 w-48 border rounded-lg shadow-lg z-20"
               >
                 <ul class="py-2 text-sm text-gray-200">
                   <li>
@@ -69,14 +69,6 @@
                       class="block px-4 py-2 hover:bg-gray-800 rounded-lg transition"
                     >
                       Mon Profil
-                    </router-link>
-                  </li>
-                  <li v-if="userRole === 'admin'">
-                    <router-link 
-                      to="/adminPage" 
-                      class="block px-4 py-2 hover:bg-gray-800 rounded-lg transition"
-                    >
-                      Admin
                     </router-link>
                   </li>
                   <li>

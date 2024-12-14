@@ -8,6 +8,8 @@ import Professors from './views/Professors.vue';
 import ProfessorDetail from './components/ProfessorDetail.vue';
 import Conversations from './views/Conversations.vue';
 import profileParameter from './views/ProfileParameter.vue';
+import PrivacyPolicy from './views/PrivacyPolicy.vue';
+import TermsOfUse from './views/TermsOfUse.vue';
 
 const router = createRouter({
     history: createWebHistory(), // Utiliser createWebHistory pour Vue Router 4
@@ -45,7 +47,25 @@ const router = createRouter({
           name: 'profileParameter',
           component: profileParameter,
         },
-    ]
+        {
+          path: '/privacyPolicy',
+          name: 'privacyPolicy',
+          component: PrivacyPolicy,
+        },
+        {
+          path: '/termsOfUse',
+          name: 'termsOfUse',
+          component: TermsOfUse,
+        },
+    ],
+
+    scrollBehavior(to, from, savedPosition) {
+      if (savedPosition) {
+        return savedPosition;
+      } else {
+        return { left: 0, top: 0 };
+      }
+    }
 });
 
 // Middleware global pour vérifier l'authentification avant d'accéder aux routes protégées
