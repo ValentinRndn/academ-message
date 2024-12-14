@@ -127,6 +127,7 @@
         <div v-if="isBookingModalOpen" class="fixed inset-0  backdrop-blur-sm  flex justify-center items-center z-50">
       <div class="modal-container border border-bordergray shadow-xl text-white p-6 rounded-lg w-96">
         <h2 class="text-xl font-bold mb-4">Réserver une session</h2>
+        <p class="mb-4 text-gray-300">Le paiement s'effectuera automatiquement une heure après le début du cours.</p>
         <label class="block mb-2">Date:</label>
         <input type="date" v-model="bookingDate" class="w-full p-2 mb-4 border rounded-md" />
         

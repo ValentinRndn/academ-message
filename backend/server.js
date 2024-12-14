@@ -4,8 +4,6 @@ const cors = require('cors');
 const { Server } = require('socket.io');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db'); 
-const fs = require('fs');
-const https = require('https');
 require('dotenv').config();
   
 // Import des modèles
@@ -15,15 +13,6 @@ dotenv.config();
 connectDB(); 
 
 const app = express();
-
-
-// const privateKey = fs.readFileSync('./ssl/private.key', 'utf8'); 
-// const certificate = fs.readFileSync('./ssl/cert.pem', 'utf8'); 
-// const ca = fs.readFileSync('./ssl/ca.pem', 'utf8'); 
-
-// const credentials = { key: privateKey, cert: certificate, ca: ca };
-
-// const server = https.createServer(credentials, app);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -100,6 +89,6 @@ io.on('connection', (socket) => {
 
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
